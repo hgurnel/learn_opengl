@@ -80,6 +80,11 @@ int main()
 
     // Vertex shader
 
+
+    // Telling OpenGL how the vertex data should be processed
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+    // Enabling the vertex attributes
+    glad_glEnableVertexAttribArray(0);
     // Create unique ID for the shader
     unsigned int vertexShader;
     vertexShader = glCreateShader(GL_VERTEX_SHADER);
