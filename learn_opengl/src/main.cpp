@@ -68,7 +68,7 @@ int main()
         0.0f,  0.5f, 0.0f
     };
 
-    /* Vertex data */
+    // Vertex data
 
     // Generate one vertex buffer object. The fct creates a unique ID for this buffer and stores it in VBO. 
     unsigned int VBO;
@@ -78,7 +78,7 @@ int main()
     // Copy vertex data in buffer's memory
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
-    /* Vertex shader */
+    // Vertex shader
 
     // Create unique ID for the shader
     unsigned int vertexShader;
@@ -96,7 +96,7 @@ int main()
         std::cout << "ERROR::SHADER::VERTEX::COMPILATION_FAILED\n" << infoLog << std::endl;
     }
 
-    /* Fragment shader */
+    // Fragment shader
 
     unsigned int fragmentShader;
     fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
@@ -110,7 +110,7 @@ int main()
         std::cout << "ERROR::SHADER::FRAGMENT::COMPILATION_FAILED\n" << infoLog << std::endl;
     }
 
-    /* Shader-program object */
+    // Shader-program object
 
     unsigned int shaderProgram;
     shaderProgram = glCreateProgram();
