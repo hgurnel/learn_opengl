@@ -60,34 +60,10 @@ int main()
         return -1;
     }
 
-    // Triangle in XY space
-    float vertices[] =
-    {
-        -0.5f, -0.5f, 0.0f,
-        .5f, -0.5f, 0.0f,
-        0.0f,  0.5f, 0.0f
-    };
+    // VERTEX SHADER
 
-    // Vertex data
-
-    // Generate one vertex buffer object. The fct creates a unique ID for this buffer and stores it in VBO. 
-    unsigned int VBO;
-    glGenBuffers(1, &VBO);
-    // Bind this buffer to the GL_ARRAY_BUFFER type
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    // Copy vertex data in buffer's memory
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
-    // Vertex shader
-
-
-    // Telling OpenGL how the vertex data should be processed
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
-    // Enabling the vertex attributes
-    glad_glEnableVertexAttribArray(0);
     // Create unique ID for the shader
-    unsigned int vertexShader;
-    vertexShader = glCreateShader(GL_VERTEX_SHADER);
+    unsigned int vertexShader = glCreateShader(GL_VERTEX_SHADER);
     // Attach shader source code to shader object
     glShaderSource(vertexShader, 1, &vertexShaderSource, NULL);
     glCompileShader(vertexShader);
@@ -101,10 +77,9 @@ int main()
         std::cout << "ERROR::SHADER::VERTEX::COMPILATION_FAILED\n" << infoLog << std::endl;
     }
 
-    // Fragment shader
+    // FRAGMENT SHADER
 
-    unsigned int fragmentShader;
-    fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
+    unsigned int fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
     glShaderSource(fragmentShader, 1, &fragmentShaderSource, NULL);
     glCompileShader(fragmentShader);
     // Check if shader compilation worked
@@ -115,10 +90,9 @@ int main()
         std::cout << "ERROR::SHADER::FRAGMENT::COMPILATION_FAILED\n" << infoLog << std::endl;
     }
 
-    // Shader-program object
+    // LINK SHADERS WITH SHADER-PROGRAM OBJECT
 
-    unsigned int shaderProgram;
-    shaderProgram = glCreateProgram();
+    unsigned int shaderProgram = glCreateProgram();
     glAttachShader(shaderProgram, vertexShader);
     glAttachShader(shaderProgram, fragmentShader);
     glLinkProgram(shaderProgram);
@@ -128,12 +102,37 @@ int main()
     {
         glGetProgramInfoLog(shaderProgram, 512, NULL, infoLog);
     }
-    // Use shader-program object
-    glUseProgram(shaderProgram);
 
     // Delete shaders because they are not needed anymore
     glDeleteShader(vertexShader);
     glDeleteShader(fragmentShader);
+
+
+    // VERTEX DATA
+
+    // Triangle in XY space
+    float vertices[] =
+    {
+        -0.5f, -0.5f, 0.0f,
+        .5f, -0.5f, 0.0f,
+        0.0f,  0.5f, 0.0f
+    };
+
+    // Generate one vertex buffer object. The fct creates a unique ID for this buffer and stores it in VBO. 
+    unsigned int VAO, VBO;
+    glGenVertexArrays(1, &VAO);
+    glGenBuffers(1, &VBO);
+    // Bind the Vertex Array Object first, then bind and set vertex buffer(s), and then configure vertex attributes(s)
+    glBindVertexArray(VAO);
+
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    // Copy vertex data in buffer's memory
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+    // Telling OpenGL how the vertex data should be processed
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+    // Enabling the vertex attributes
+    glad_glEnableVertexAttribArray(0);
 
 
     // RENDER LOOP
@@ -144,6 +143,11 @@ int main()
         // Clear the frame buffer and apply new colour to window
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
+
+        // Use shader-program object
+        glUseProgram(shaderProgram);
+        glBindVertexArray(VAO);
+        glDrawArrays(GL_TRIANGLES, 0, 3);
 
         // Swap front (img displayed on screen) and back (img being rendered) buffers to render img without flickering effect
         glfwSwapBuffers(window);
