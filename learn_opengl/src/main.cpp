@@ -8,7 +8,15 @@
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void processInput(GLFWwindow* window);
 
-// settings
+// Shader source codes
+const char* vertexShaderSource = "#version 330 core\n"
+"layout (location = 0) in vec3 aPos;\n"
+"void main()\n"
+"{\n"
+"   gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);\n"
+"}\0";
+
+// Settings
 const unsigned int SCR_WIDTH = 800;
 const unsigned int SCR_HEIGHT = 600;
 
@@ -16,14 +24,14 @@ const unsigned int SCR_HEIGHT = 600;
 
 int main()
 {
-    // WINDOW INIT AND CONFIG
+    // Window init 
     glfwInit();
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     // Use core profile to get access to a smaller subset of OpenGL features without backwards-compatible features we no longer need
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-    //// WINDOW CREATION
+    // Window creation
     GLFWwindow* window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "LearnOpenGL", NULL, NULL);
     
     if (window == NULL)
@@ -38,13 +46,49 @@ int main()
     // Register the resizing callback fct in GLFW
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 
-
     // Load OpenGL fct ptrs
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
     {
-        std::cout << "Failed to initialize GLAD" << std::endl;
+        std::cout << "Failed to initialise GLAD" << std::endl;
         return -1;
     }
+
+    // Triangle in XY space
+    float vertices[] =
+    {
+        -0.5f, -0.5f, 0.0f,
+        .5f, -0.5f, 0.0f,
+        0.0f,  0.5f, 0.0f
+    };
+
+    /* Vertex data */
+
+    // Generate one vertex buffer object. The fct creates a unique ID for this buffer and stores it in VBO. 
+    unsigned int VBO;
+    glGenBuffers(1, &VBO);
+    // Bind this buffer to the GL_ARRAY_BUFFER type
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    // Copy vertex data in buffer's memory
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+    /* Vertex shader */
+
+    // Create unique ID for the shader
+    unsigned int vertexShader;
+    vertexShader = glCreateShader(GL_VERTEX_SHADER);
+    // Attach shader source code to shader object
+    glShaderSource(vertexShader, 1, &vertexShaderSource, NULL);
+    glCompileShader(vertexShader);
+    // Check if shader compilation worked
+    int success;
+    char infoLog[512];
+    glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &success);
+    if (!success)
+    {
+        glGetShaderInfoLog(vertexShader, 512, NULL, infoLog);
+        std::cout << "ERROR::SHADER::VERTEX::COMPILATION_FAILED\n" << infoLog << std::endl;
+    }
+
 
     // RENDER LOOP
     while (!glfwWindowShouldClose(window))
