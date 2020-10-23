@@ -69,13 +69,26 @@ int main()
 
     // VERTEX DATA (copy in vertex buffer, then processing method)
 
-    // Triangle in XY space
+    // Unique vertices to represent a rectangle
     float vertices[] =
     {
-        -0.5f, -0.5f, 0.0f,
-          .5f, -0.5f, 0.0f,
-         0.0f,  0.5f, 0.0f
+         0.5f,  0.5f, 0.0f,  // 0: top right
+         0.5f, -0.5f, 0.0f,  // 1: bottom right
+        -0.5f, -0.5f, 0.0f,  // 2: bottom left
+        -0.5f,  0.5f, 0.0f   // 3: top left 
     };
+
+    unsigned int indices[] = 
+    {
+        0, 1, 3,   // first triangle
+        1, 2, 3    // second triangle
+    };
+
+    // Element buffer object (EBO) to draw the rectangle using only unique vertices (several times
+    unsigned int EBO;
+    glGenBuffers(1, &EBO);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
     // Generate 1 vertex array and 1 vertex buffer, each with a unique ID 
     unsigned int VAO, VBO;
@@ -154,8 +167,8 @@ int main()
 
         // Use shader-program object
         glUseProgram(shaderProgram);
-        glBindVertexArray(VAO);
-        glDrawArrays(GL_TRIANGLES, 0, 3);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT,0);
 
         // Swap front (img displayed on screen) and back (img being rendered) buffers to render img without flickering effect
         glfwSwapBuffers(window);
