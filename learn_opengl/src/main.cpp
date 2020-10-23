@@ -60,6 +60,7 @@ int main()
         return -1;
     }
 
+
     // VERTEX DATA (copy in vertex buffer, then processing method)
 
     // Triangle in XY space
@@ -103,6 +104,7 @@ int main()
         std::cout << "ERROR::SHADER::VERTEX::COMPILATION_FAILED\n" << infoLog << std::endl;
     }
 
+
     // FRAGMENT SHADER
 
     unsigned int fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
@@ -115,6 +117,7 @@ int main()
         glGetShaderInfoLog(fragmentShader, 512, NULL, infoLog);
         std::cout << "ERROR::SHADER::FRAGMENT::COMPILATION_FAILED\n" << infoLog << std::endl;
     }
+
 
     // LINK SHADERS WITH SHADER-PROGRAM OBJECT
 
