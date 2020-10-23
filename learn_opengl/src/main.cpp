@@ -132,7 +132,7 @@ int main()
         glGetProgramInfoLog(shaderProgram, 512, NULL, infoLog);
     }
 
-    // Delete shaders because they are not needed anymore
+    // Delete vertex and fragment shaders because they are not needed anymore
     glDeleteShader(vertexShader);
     glDeleteShader(fragmentShader);
 
