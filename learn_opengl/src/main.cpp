@@ -13,32 +13,28 @@ void processInput(GLFWwindow* window);
 // Using raw string literals to avoid writing \n constantly
 const char* vertexShaderSource = R"glsl(
 #version 330 core
-
 layout(location = 0) in vec3 aPos;
+out vec4 vertexColor; // Specifies a colour output to be read by the fragment shader
 
 void main()
 {
-   gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);
+    gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);
+    vertexColor = vec4(0.5, 0.0, 0.0, 1.0);
 }
 )glsl";
 
 const char* fragmentShaderSource = R"glsl(
 #version 330 core
-
 out vec4 FragColor;
+in vec4 vertexColor;
 
 void main()
 {
-   FragColor = vec4(1.0f, 0.5f, 0.2f, 1.0f);
+    FragColor = vertexColor;
 }
 )glsl";
 
-//const char* fragmentShaderSource = "#version 330 core\n"
-//"out vec4 FragColor;\n"
-//"void main()\n"
-//"{\n"
-//"   FragColor = vec4(1.0f, 0.5f, 0.2f, 1.0f);\n"
-//"}\0";
+
 
 // Settings
 const unsigned int SCREEN_WIDTH = 800;
