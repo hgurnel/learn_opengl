@@ -22,12 +22,23 @@ void main()
 }
 )glsl";
 
-const char* fragmentShaderSource = "#version 330 core\n"
-"out vec4 FragColor;\n"
-"void main()\n"
-"{\n"
-"   FragColor = vec4(1.0f, 0.5f, 0.2f, 1.0f);\n"
-"}\0";
+const char* fragmentShaderSource = R"glsl(
+#version 330 core
+
+out vec4 FragColor;
+
+void main()
+{
+   FragColor = vec4(1.0f, 0.5f, 0.2f, 1.0f);
+}
+)glsl";
+
+//const char* fragmentShaderSource = "#version 330 core\n"
+//"out vec4 FragColor;\n"
+//"void main()\n"
+//"{\n"
+//"   FragColor = vec4(1.0f, 0.5f, 0.2f, 1.0f);\n"
+//"}\0";
 
 // Settings
 const unsigned int SCREEN_WIDTH = 800;
