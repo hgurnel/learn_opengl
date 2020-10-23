@@ -60,6 +60,32 @@ int main()
         return -1;
     }
 
+    // VERTEX DATA (copy in vertex buffer, then processing method)
+
+    // Triangle in XY space
+    float vertices[] =
+    {
+        -0.5f, -0.5f, 0.0f,
+          .5f, -0.5f, 0.0f,
+         0.0f,  0.5f, 0.0f
+    };
+
+    // Generate 1 vertex array and 1 vertex buffer, each with a unique ID 
+    unsigned int VAO, VBO;
+    glGenVertexArrays(1, &VAO);
+    glGenBuffers(1, &VBO);
+    // Bind the Vertex Array Object first, then bind and set vertex buffer. The VAO will save the config of the VBO.
+    glBindVertexArray(VAO);
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    // Copy vertex data in buffer's memory
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+    // Tell OpenGL how the vertex data should be processed
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+    // Enable the position attribute of the vertex
+    glad_glEnableVertexAttribArray(0);
+
+
     // VERTEX SHADER
 
     // Create unique ID for the shader
@@ -106,33 +132,6 @@ int main()
     // Delete shaders because they are not needed anymore
     glDeleteShader(vertexShader);
     glDeleteShader(fragmentShader);
-
-
-    // VERTEX DATA
-
-    // Triangle in XY space
-    float vertices[] =
-    {
-        -0.5f, -0.5f, 0.0f,
-        .5f, -0.5f, 0.0f,
-        0.0f,  0.5f, 0.0f
-    };
-
-    // Generate one vertex buffer object. The fct creates a unique ID for this buffer and stores it in VBO. 
-    unsigned int VAO, VBO;
-    glGenVertexArrays(1, &VAO);
-    glGenBuffers(1, &VBO);
-    // Bind the Vertex Array Object first, then bind and set vertex buffer(s), and then configure vertex attributes(s)
-    glBindVertexArray(VAO);
-
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    // Copy vertex data in buffer's memory
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
-    // Telling OpenGL how the vertex data should be processed
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
-    // Enabling the vertex attributes
-    glad_glEnableVertexAttribArray(0);
 
 
     // RENDER LOOP
