@@ -26,11 +26,12 @@ void main()
 const char* fragmentShaderSource = R"glsl(
 #version 330 core
 out vec4 FragColor;
-in vec4 vertexColor;
+
+uniform vec4 ourColour;
 
 void main()
 {
-    FragColor = vertexColor;
+    FragColor = ourColour;
 }
 )glsl";
 
@@ -171,8 +172,13 @@ int main()
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
 
-        // Draw rectangle
+        // Draw rectangle with varying colour
         glUseProgram(shaderProgram);
+        float timeValue = glfwGetTime();
+        float greenValue = (sin(timeValue) / 2.0f) + 0.5f;
+        // Recover the location of the uniform containing the vertex colour
+        int vertexColourLocation = glGetUniformLocation(shaderProgram, "ourColour");
+        glUniform4f(vertexColourLocation, 0.0f, greenValue, 0.0f, 1.0f);
         glBindVertexArray(VAO);
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
         //glBindVertexArray(0); // to unbind (no need to unbind every time)
