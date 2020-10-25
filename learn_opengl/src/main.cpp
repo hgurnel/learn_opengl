@@ -178,6 +178,7 @@ int main()
         float greenValue = (sin(timeValue) / 2.0f) + 0.5f;
         // Recover the location of the uniform containing the vertex colour
         int vertexColourLocation = glGetUniformLocation(shaderProgram, "ourColour");
+        // Update value of uniform with an RGBA vector
         glUniform4f(vertexColourLocation, 0.0f, greenValue, 0.0f, 1.0f);
         glBindVertexArray(VAO);
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
