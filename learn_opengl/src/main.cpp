@@ -14,12 +14,10 @@ void processInput(GLFWwindow* window);
 const char* vertexShaderSource = R"glsl(
 #version 330 core
 layout(location = 0) in vec3 aPos;
-out vec4 vertexColor; // Specifies a colour output to be read by the fragment shader
 
 void main()
 {
     gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);
-    vertexColor = vec4(0.5, 0.0, 0.0, 1.0);
 }
 )glsl";
 
@@ -36,11 +34,9 @@ void main()
 )glsl";
 
 
-
 // Settings
 const unsigned int SCREEN_WIDTH = 800;
 const unsigned int SCREEN_HEIGHT = 600;
-
 
 
 int main()
@@ -77,36 +73,24 @@ int main()
 
     // VERTEX DATA (copy in vertex buffer, then processing method)
 
-    // Unique vertices to represent a rectangle
-    float vertices[] =
+    // Unique vertices to represent a triangle
+    float vertices[] = 
     {
-         0.5f,  0.5f, 0.0f,  // 0: top right
-         0.5f, -0.5f, 0.0f,  // 1: bottom right
-        -0.5f, -0.5f, 0.0f,  // 2: bottom left
-        -0.5f,  0.5f, 0.0f   // 3: top left 
-    };
-
-    unsigned int indices[] = 
-    {
-        0, 1, 3,   // first triangle
-        1, 2, 3    // second triangle
+         0.5f, -0.5f, 0.0f,  // bottom right
+        -0.5f, -0.5f, 0.0f,  // bottom left
+         0.0f,  0.5f, 0.0f   // top 
     };
 
     // Generate 1 vertex array, 1 vertex buffer and 1 element buffer, each with a unique ID 
-    unsigned int VAO, VBO, EBO;
+    unsigned int VAO, VBO;
     glGenVertexArrays(1, &VAO);
     glGenBuffers(1, &VBO);
-    glGenBuffers(1, &EBO);
     // Bind the Vertex Array Object first
     glBindVertexArray(VAO);
 
     // Copy vertex data in buffer's memory. The VAO will save the config of the bound VBO.
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
-    // Copy indices into element buffer. The indices of the EBO are connected to the vertices of the bound VBO.
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);    
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
     // Tell OpenGL how the vertex data should be processed, then enable the position attribute of the vertex
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
@@ -181,7 +165,7 @@ int main()
         // Update value of uniform with an RGBA vector
         glUniform4f(vertexColourLocation, 0.0f, greenValue, 0.0f, 1.0f);
         glBindVertexArray(VAO);
-        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+        glDrawArrays(GL_TRIANGLES, 0, 3);
         //glBindVertexArray(0); // to unbind (no need to unbind every time)
 
         // Swap front (img displayed on screen) and back (img being rendered) buffers to render img without flickering effect
@@ -193,7 +177,6 @@ int main()
     // Optional: de-allocate resources
     glDeleteVertexArrays(1, &VAO);
     glDeleteBuffers(1, &VBO);
-    glDeleteBuffers(1, &EBO);
     glDeleteProgram(shaderProgram);
 
     // Delete all of GLFW's resources that were allocated
