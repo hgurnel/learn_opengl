@@ -78,3 +78,7 @@ bin/x64/Debug/learn_opengl.pdb
 #learn_opengl/learn_opengl.vcxproj.user
 
 *.ipch
+
+*.filters
+
+*.vcxproj
