@@ -14,22 +14,26 @@ void processInput(GLFWwindow* window);
 const char* vertexShaderSource = R"glsl(
 #version 330 core
 layout(location = 0) in vec3 aPos;
+layout(location = 1) in vec3 aColor;
+
+// Output a color to the fragment shader
+out vec3 ourColor;
 
 void main()
 {
-    gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);
+    gl_Position = vec4(aPos, 1.0);
+    ourColor = aColor;
 }
 )glsl";
 
 const char* fragmentShaderSource = R"glsl(
 #version 330 core
 out vec4 FragColor;
-
-uniform vec4 ourColour;
+in vec3 ourColor;
 
 void main()
 {
-    FragColor = ourColour;
+    FragColor = vec4(ourColor, 1.0);
 }
 )glsl";
 
@@ -74,11 +78,11 @@ int main()
     // VERTEX DATA (copy in vertex buffer, then processing method)
 
     // Unique vertices to represent a triangle
-    float vertices[] = 
-    {
-         0.5f, -0.5f, 0.0f,  // bottom right
-        -0.5f, -0.5f, 0.0f,  // bottom left
-         0.0f,  0.5f, 0.0f   // top 
+    float vertices[] = {
+        // positions         // colors
+         0.5f, -0.5f, 0.0f,  1.0f, 0.0f, 0.0f,   // bottom right
+        -0.5f, -0.5f, 0.0f,  0.0f, 1.0f, 0.0f,   // bottom left
+         0.0f,  0.5f, 0.0f,  0.0f, 0.0f, 1.0f    // top 
     };
 
     // Generate 1 vertex array, 1 vertex buffer and 1 element buffer, each with a unique ID 
@@ -92,9 +96,15 @@ int main()
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
-    // Tell OpenGL how the vertex data should be processed, then enable the position attribute of the vertex
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+    // Tell OpenGL how the vertex data should be processed
+    // Position attribute (location = 0)
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
     glad_glEnableVertexAttribArray(0);
+    // Color attribute (location = 1)
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3*sizeof(float)));
+    glad_glEnableVertexAttribArray(1);
+
+
 
 
     // VERTEX SHADER
@@ -152,18 +162,18 @@ int main()
     {
         processInput(window);
 
-        // Clear the frame buffer and apply new colour to window
+        // Clear the frame buffer and apply new color to window
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
 
-        // Draw rectangle with varying colour
+        // Draw rectangle with varying color
         glUseProgram(shaderProgram);
         float timeValue = glfwGetTime();
         float greenValue = (sin(timeValue) / 2.0f) + 0.5f;
-        // Recover the location of the uniform containing the vertex colour
-        int vertexColourLocation = glGetUniformLocation(shaderProgram, "ourColour");
+        // Recover the location of the uniform containing the vertex color
+        int vertexColorLocation = glGetUniformLocation(shaderProgram, "ourColor");
         // Update value of uniform with an RGBA vector
-        glUniform4f(vertexColourLocation, 0.0f, greenValue, 0.0f, 1.0f);
+        glUniform4f(vertexColorLocation, 0.0f, greenValue, 0.0f, 1.0f);
         glBindVertexArray(VAO);
         glDrawArrays(GL_TRIANGLES, 0, 3);
         //glBindVertexArray(0); // to unbind (no need to unbind every time)
