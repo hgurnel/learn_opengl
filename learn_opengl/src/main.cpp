@@ -2,13 +2,11 @@
 // so be sure to include GLAD before other header files that require OpenGL (like GLFW). 
 #include "glad/glad.h"
 #include "GLFW/glfw3.h"
-#include <iostream>
 #include "../header/Shader.h"
-
+#include <iostream>
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void processInput(GLFWwindow* window);
-
 
 // Settings
 const unsigned int SCREEN_WIDTH = 800;
