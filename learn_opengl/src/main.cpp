@@ -88,7 +88,6 @@ int main()
 
         // Draw rectangle with varying color
         ourShader.use();
-        ourShader.setFloat("posOffset", 0.25f);
         glBindVertexArray(VAO);
         glDrawArrays(GL_TRIANGLES, 0, 3);
         //glBindVertexArray(0); // to unbind (no need to unbind every time)
