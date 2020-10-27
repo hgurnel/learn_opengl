@@ -3,6 +3,7 @@
 Shader::Shader(const char* vertexPath, const char* fragmentPath, const char* geometryPath)
 {
     // 1. retrieve the vertex/fragment source code from filePath
+    
     std::string vertexCode;
     std::string fragmentCode;
     std::string geometryCode;
@@ -44,18 +45,22 @@ Shader::Shader(const char* vertexPath, const char* fragmentPath, const char* geo
     }
     const char* vShaderCode = vertexCode.c_str();
     const char* fShaderCode = fragmentCode.c_str();
+    
     // 2. compile shaders
     unsigned int vertex, fragment;
+    
     // vertex shader
     vertex = glCreateShader(GL_VERTEX_SHADER);
     glShaderSource(vertex, 1, &vShaderCode, NULL);
     glCompileShader(vertex);
     checkCompileErrors(vertex, "VERTEX");
+    
     // fragment Shader
     fragment = glCreateShader(GL_FRAGMENT_SHADER);
     glShaderSource(fragment, 1, &fShaderCode, NULL);
     glCompileShader(fragment);
     checkCompileErrors(fragment, "FRAGMENT");
+    
     // if geometry shader is given, compile geometry shader
     unsigned int geometry;
     if (geometryPath != nullptr)
@@ -66,6 +71,7 @@ Shader::Shader(const char* vertexPath, const char* fragmentPath, const char* geo
         glCompileShader(geometry);
         checkCompileErrors(geometry, "GEOMETRY");
     }
+    
     // shader Program
     m_ID = glCreateProgram();
     glAttachShader(m_ID, vertex);
@@ -74,6 +80,7 @@ Shader::Shader(const char* vertexPath, const char* fragmentPath, const char* geo
         glAttachShader(m_ID, geometry);
     glLinkProgram(m_ID);
     checkCompileErrors(m_ID, "PROGRAM");
+    
     // delete the shaders as they're linked into our program now and no longer necessery
     glDeleteShader(vertex);
     glDeleteShader(fragment);
@@ -85,6 +92,7 @@ void Shader::use()
 {
     glUseProgram(m_ID);
 }
+
 // utility uniform functions
 // ------------------------------------------------------------------------
 void Shader::setBool(const std::string& name, bool value) const
