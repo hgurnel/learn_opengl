@@ -79,6 +79,10 @@ bin/x64/Debug/learn_opengl.pdb
 
 *.ipch
 
-*.filters
+#*.filters
 
-*.vcxproj
+#*.vcxproj
+
+bin/intermediates/x64/Debug/learn_opengl.vcxproj.FileListAbsolute.txt
+
+bin/intermediates/x64/Debug/learn_opengl.Build.CppClean.log
