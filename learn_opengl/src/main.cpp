@@ -44,9 +44,8 @@ int main()
         return -1;
     }
 
-    // SHADERS
-    Shader ourShader("D:/HG/dev/cpp/learn_opengl/learn_opengl/shader.vs", "D:/HG/dev/cpp/learn_opengl/learn_opengl/shader.fs");
-
+    // SHADERS   
+    Shader ourShader("shader.vs", "shader.fs");
 
     // VERTEX DATA (copy in vertex buffer, then processing method)
 
