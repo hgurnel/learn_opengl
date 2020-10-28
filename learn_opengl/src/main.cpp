@@ -2,12 +2,15 @@
 // so be sure to include GLAD before other header files that require OpenGL (like GLFW). 
 #include "glad/glad.h"
 #include "GLFW/glfw3.h"
-#include "../header/Shader.h"
 #include "../header/stb_image.h"
+
+#include "../header/Shader.h"
+
 #include <iostream>
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void processInput(GLFWwindow* window);
+
 
 // Settings
 const unsigned int SCREEN_WIDTH = 800;
@@ -45,14 +48,59 @@ int main()
         return -1;
     }
 
+    // SHADER PROGRAM
+    Shader ourShader("shader.vs", "shader.fs");
+
+    // VERTEX DATA (copy in vertex buffer, then processing method)
+
+// Vertices representing a rectangle 
+    float vertices[] =
+    {
+        // positions          // colors           // texture coords
+         0.5f,  0.5f, 0.0f,   1.0f, 0.0f, 0.0f,   1.0f, 1.0f,   // top right
+         0.5f, -0.5f, 0.0f,   0.0f, 1.0f, 0.0f,   1.0f, 0.0f,   // bottom right
+        -0.5f, -0.5f, 0.0f,   0.0f, 0.0f, 1.0f,   0.0f, 0.0f,   // bottom left
+        -0.5f,  0.5f, 0.0f,   1.0f, 1.0f, 0.0f,   0.0f, 1.0f    // top left 
+    };
+
+    unsigned int indices[] =
+    {
+        0, 1, 3,  // first triangle
+        1, 2, 3   // second triangle
+    };
+
+    // Generate 1 vertex array, 1 vertex buffer and 1 element buffer, each with a unique ID 
+    unsigned int VAO, VBO, EBO;
+    glGenVertexArrays(1, &VAO);
+    glGenBuffers(1, &VBO);
+    glGenBuffers(1, &EBO);
+    // Bind the Vertex Array Object first
+    glBindVertexArray(VAO);
+
+    // Copy vertex data in buffer's memory. The VAO will save the config of the bound VBO.
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+
+    // Tell OpenGL how the vertex data should be processed
+    // Position attribute (location = 0)
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
+    glad_glEnableVertexAttribArray(0);
+    // Color attribute (location = 1)
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
+    glad_glEnableVertexAttribArray(1);
+    // Texture attribute (location = 2)
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
+    glad_glEnableVertexAttribArray(2);
+
     // TEXTURE
 
-    // Generate a texture object
+    // Generate a texture object and bind it
     unsigned int texture;
     glGenTextures(1, &texture);
-    // Bind texture
     glBindTexture(GL_TEXTURE_2D, texture);
-
     // set the texture wrapping/filtering options (on the currently bound texture object)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
@@ -77,40 +125,6 @@ int main()
     stbi_image_free(data);
 
 
-
-    // SHADERS   
-    Shader ourShader("shader.vs", "shader.fs");
-
-    // VERTEX DATA (copy in vertex buffer, then processing method)
-
-    // Unique vertices to represent a triangle
-    float vertices[] = {
-        // positions         // colors
-         0.5f, -0.5f, 0.0f,  1.0f, 0.0f, 0.0f,   // bottom right
-        -0.5f, -0.5f, 0.0f,  0.0f, 1.0f, 0.0f,   // bottom left
-         0.0f,  0.5f, 0.0f,  0.0f, 0.0f, 1.0f    // top 
-    };
-
-    // Generate 1 vertex array, 1 vertex buffer and 1 element buffer, each with a unique ID 
-    unsigned int VAO, VBO;
-    glGenVertexArrays(1, &VAO);
-    glGenBuffers(1, &VBO);
-    // Bind the Vertex Array Object first
-    glBindVertexArray(VAO);
-
-    // Copy vertex data in buffer's memory. The VAO will save the config of the bound VBO.
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
-    // Tell OpenGL how the vertex data should be processed
-    // Position attribute (location = 0)
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
-    glad_glEnableVertexAttribArray(0);
-    // Color attribute (location = 1)
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3*sizeof(float)));
-    glad_glEnableVertexAttribArray(1);
-
-
     // RENDER LOOP
     while (!glfwWindowShouldClose(window))
     {
@@ -120,10 +134,11 @@ int main()
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
 
-        // Draw rectangle with varying color
+        // Draw rectangle with texture
         ourShader.use();
+        glBindTexture(GL_TEXTURE_2D, texture);
         glBindVertexArray(VAO);
-        glDrawArrays(GL_TRIANGLES, 0, 3);
+        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
         //glBindVertexArray(0); // to unbind (no need to unbind every time)
 
         // Swap front (img displayed on screen) and back (img being rendered) buffers to render img without flickering effect
