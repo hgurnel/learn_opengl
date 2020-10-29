@@ -212,9 +212,17 @@ void processInput(GLFWwindow* window)
     if (glfwGetKey(window, GLFW_KEY_2) == GLFW_PRESS)
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
     if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
-        mixPercent += 0.01;
+    {
+        mixPercent += 0.001f; // change this value accordingly (might be too slow or too fast based on system hardware)
+        if (mixPercent >= 1.0f)
+            mixPercent = 1.0f;
+    }
     if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
-        mixPercent -= 0.01;
+    {
+        mixPercent -= 0.001f; // change this value accordingly (might be too slow or too fast based on system hardware)
+        if (mixPercent <= 0.0f)
+            mixPercent = 0.0f;
+    }
 }
 
 // Callback fct that is called every time the window is resized
