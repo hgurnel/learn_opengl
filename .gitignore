@@ -88,3 +88,7 @@ bin/intermediates/x64/Debug/learn_opengl.vcxproj.FileListAbsolute.txt
 bin/intermediates/x64/Debug/learn_opengl.Build.CppClean.log
 
 learn_opengl/learn_opengl.vcxproj.user
+
+learn_opengl/learn_opengl.vcxproj.filters
+
+learn_opengl/learn_opengl.vcxproj
