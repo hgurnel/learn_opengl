@@ -187,34 +187,24 @@ int main()
         // Change percentage of mix between the two texture
         ourShader.setFloat("mixPercentage", mixPercent);
 
-        // TRANSFORM 1
+        // Coordinate systems
+        glm::mat4 model =       glm::mat4(1.0f);
+        glm::mat4 view =        glm::mat4(1.0f);
+        glm::mat4 projection =  glm::mat4(1.0f);        
+        model = glm::rotate(model, glm::radians(-55.0f), glm::vec3(1.0f, 0.0f, 0.0f));        
+        // NB: we're translating the scene in the reverse direction of where we want to move (the scene moves, not the cam)
+        view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));        
+        // perspective(fov, aspect ratio, near plane, far plane)
+        projection = glm::perspective(glm::radians(45.0f), 800.0f / 600.0f, 0.1f, 100.0f);
 
-        // CAUTION: the first transfo to be applied is the last one, so here it is the rotation
-        glm::mat4 transform = glm::mat4(1.0f);
-        transform = glm::translate(transform, glm::vec3(0.5f, -0.5f, 0.0f));
-        transform = glm::rotate(transform, (float)glfwGetTime(), glm::vec3(0.0f, 0.0f, 1.0f));
+        unsigned int modelLoc = glGetUniformLocation(ourShader.m_ID, "model");
+        glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+        modelLoc = glGetUniformLocation(ourShader.m_ID, "view");
+        glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(view));
+        modelLoc = glGetUniformLocation(ourShader.m_ID, "projection");
+        glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(projection));
 
-        // Apply transform to rectangle 1
-        unsigned int transformLoc = glGetUniformLocation(ourShader.m_ID, "transform");
-        glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(transform));
-
-        // Draw the first rectangle
         glBindVertexArray(VAO);
-        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-
-        // TRANSFORM 2
-        
-        // Reset transform
-        transform = glm::mat4(1.0f); 
-        transform = glm::translate(transform, glm::vec3(-0.5f, 0.5f, 0.0f));
-        float timeValue = glfwGetTime();
-        float scaleAmount = (sin(timeValue) / 2.0f) + 0.5f;
-        transform = glm::scale(transform, glm::vec3(scaleAmount, scaleAmount, 1.0f));
-
-        // Apply transform to rectangle 2
-        // this time take the matrix value array's first element as its memory pointer value
-        glUniformMatrix4fv(transformLoc, 1, GL_FALSE, &transform[0][0]); 
-        // Once the uniform matrix was updated, draw the second rectangle
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
         // Swap front (img displayed on screen) and back (img being rendered) buffers to render img without flickering effect
