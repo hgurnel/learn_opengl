@@ -4,6 +4,7 @@
 #include "GLFW/glfw3.h"
 #include "../header/stb_image.h"
 
+// CAUTION (GLM has a coluém-major convention): (COL, ROW) and not (row, col) as usual
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
@@ -166,6 +167,7 @@ int main()
     glUniform1i(glGetUniformLocation(ourShader.m_ID, "fsTexture1"), 0); // manual setting
     ourShader.setInt("fsTexture2", 1); // setting through shader class
 
+
     // RENDER LOOP
     while (!glfwWindowShouldClose(window))
     {
@@ -174,6 +176,13 @@ int main()
         // Clear the frame buffer and apply new color to window
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
+
+        // TRANSFORM
+
+        // CAUTION: the first transfo to be applied is the last one, so here it is the rotation
+        glm::mat4 trans = glm::mat4(1.0f);
+        trans = glm::translate(trans, glm::vec3(0.5f, -0.5f, 0.0f));
+        trans = glm::rotate(trans, (float)glfwGetTime(), glm::vec3(0.0f, 0.0f, 1.0f));
 
         // Activate texture units and bing corresponding texture
         glActiveTexture(GL_TEXTURE0);
@@ -185,6 +194,10 @@ int main()
 
         // Change percentage of mix between the two texture
         ourShader.setFloat("mixPercentage", mixPercent);
+
+        // Apply transform to rectangle and smiley
+        unsigned int transformLoc = glGetUniformLocation(ourShader.m_ID, "transform");
+        glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(trans));
 
         glBindVertexArray(VAO);
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
