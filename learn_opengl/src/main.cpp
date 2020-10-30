@@ -181,8 +181,8 @@ int main()
 
         // CAUTION: the first transfo to be applied is the last one, so here it is the rotation
         glm::mat4 trans = glm::mat4(1.0f);
-        trans = glm::translate(trans, glm::vec3(0.5f, -0.5f, 0.0f));
         trans = glm::rotate(trans, (float)glfwGetTime(), glm::vec3(0.0f, 0.0f, 1.0f));
+        trans = glm::translate(trans, glm::vec3(0.5f, -0.5f, 0.0f));
 
         // Activate texture units and bing corresponding texture
         glActiveTexture(GL_TEXTURE0);
