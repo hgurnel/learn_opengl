@@ -167,7 +167,6 @@ int main()
     glUniform1i(glGetUniformLocation(ourShader.m_ID, "fsTexture1"), 0); // manual setting
     ourShader.setInt("fsTexture2", 1); // setting through shader class
 
-
     // RENDER LOOP
     while (!glfwWindowShouldClose(window))
     {
@@ -176,13 +175,6 @@ int main()
         // Clear the frame buffer and apply new color to window
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
-
-        // TRANSFORM
-
-        // CAUTION: the first transfo to be applied is the last one, so here it is the rotation
-        glm::mat4 trans = glm::mat4(1.0f);
-        trans = glm::rotate(trans, (float)glfwGetTime(), glm::vec3(0.0f, 0.0f, 1.0f));
-        trans = glm::translate(trans, glm::vec3(0.5f, -0.5f, 0.0f));
 
         // Activate texture units and bing corresponding texture
         glActiveTexture(GL_TEXTURE0);
@@ -195,11 +187,34 @@ int main()
         // Change percentage of mix between the two texture
         ourShader.setFloat("mixPercentage", mixPercent);
 
-        // Apply transform to rectangle and smiley
-        unsigned int transformLoc = glGetUniformLocation(ourShader.m_ID, "transform");
-        glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(trans));
+        // TRANSFORM 1
 
+        // CAUTION: the first transfo to be applied is the last one, so here it is the rotation
+        glm::mat4 transform = glm::mat4(1.0f);
+        transform = glm::translate(transform, glm::vec3(0.5f, -0.5f, 0.0f));
+        transform = glm::rotate(transform, (float)glfwGetTime(), glm::vec3(0.0f, 0.0f, 1.0f));
+
+        // Apply transform to rectangle 1
+        unsigned int transformLoc = glGetUniformLocation(ourShader.m_ID, "transform");
+        glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(transform));
+
+        // Draw the first rectangle
         glBindVertexArray(VAO);
+        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+
+        // TRANSFORM 2
+        
+        // Reset transform
+        transform = glm::mat4(1.0f); 
+        transform = glm::translate(transform, glm::vec3(-0.5f, 0.5f, 0.0f));
+        float timeValue = glfwGetTime();
+        float scaleAmount = (sin(timeValue) / 2.0f) + 0.5f;
+        transform = glm::scale(transform, glm::vec3(scaleAmount, scaleAmount, 1.0f));
+
+        // Apply transform to rectangle 2
+        // this time take the matrix value array's first element as its memory pointer value
+        glUniformMatrix4fv(transformLoc, 1, GL_FALSE, &transform[0][0]); 
+        // Once the uniform matrix was updated, draw the second rectangle
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
         // Swap front (img displayed on screen) and back (img being rendered) buffers to render img without flickering effect
