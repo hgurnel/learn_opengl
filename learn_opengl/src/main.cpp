@@ -167,7 +167,6 @@ int main()
     glUniform1i(glGetUniformLocation(ourShader.m_ID, "fsTexture1"), 0); // manual setting
     ourShader.setInt("fsTexture2", 1); // setting through shader class
 
-
     // RENDER LOOP
     while (!glfwWindowShouldClose(window))
     {
@@ -180,9 +179,16 @@ int main()
         // TRANSFORM
 
         // CAUTION: the first transfo to be applied is the last one, so here it is the rotation
-        glm::mat4 trans = glm::mat4(1.0f);
-        trans = glm::rotate(trans, (float)glfwGetTime(), glm::vec3(0.0f, 0.0f, 1.0f));
-        trans = glm::translate(trans, glm::vec3(0.5f, -0.5f, 0.0f));
+        glm::mat4 trans1 = glm::mat4(1.0f);
+        trans1 = glm::translate(trans1, glm::vec3(0.5f, -0.5f, 0.0f));
+        trans1 = glm::rotate(trans1, (float)glfwGetTime(), glm::vec3(0.0f, 0.0f, 1.0f));
+
+        glm::mat4 trans2 = glm::mat4(1.0f);
+        //trans2 = glm::rotate(trans2, (float)glfwGetTime(), glm::vec3(0.0f, 0.0f, 1.0f));
+        float timeValue = glfwGetTime();
+        float scaleValue = (sin(timeValue) / 2.0f) + 0.5f;
+        trans2 = glm::scale(trans2, glm::vec3(scaleValue, scaleValue, 1.0f));
+        trans2 = glm::translate(trans2, glm::vec3(-0.5f, 0.5f, 0.0f));
 
         // Activate texture units and bing corresponding texture
         glActiveTexture(GL_TEXTURE0);
@@ -195,11 +201,15 @@ int main()
         // Change percentage of mix between the two texture
         ourShader.setFloat("mixPercentage", mixPercent);
 
-        // Apply transform to rectangle and smiley
+        // Apply transform to rectangle 1
         unsigned int transformLoc = glGetUniformLocation(ourShader.m_ID, "transform");
-        glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(trans));
+        glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(trans1));
 
         glBindVertexArray(VAO);
+        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+
+        // Apply transform to rectangle 2
+        glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(trans2));
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
         // Swap front (img displayed on screen) and back (img being rendered) buffers to render img without flickering effect
