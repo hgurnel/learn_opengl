@@ -4,7 +4,7 @@
 #include "GLFW/glfw3.h"
 #include "../header/stb_image.h"
 
-// CAUTION (GLM has a coluém-major convention): (COL, ROW) and not (row, col) as usual
+// CAUTION (GLM has a column-major convention): (COL, ROW) and not (row, col) as usual
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
@@ -16,7 +16,6 @@
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void processInput(GLFWwindow* window);
 
-
 // Settings
 const unsigned int SCREEN_WIDTH = 800;
 const unsigned int SCREEN_HEIGHT = 600;
@@ -24,11 +23,13 @@ const unsigned int SCREEN_HEIGHT = 600;
 
 int main()
 {
-    // Window init 
+    //  ----- WINDOW 
+
     glfwInit();
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-    // Use core profile to get access to a smaller subset of OpenGL features without backwards-compatible features we no longer need
+    // Use core profile to get access to a smaller subset of OpenGL features without 
+    // backwards-compatible features we no longer need
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
     // Window creation
@@ -55,10 +56,11 @@ int main()
 
     glEnable(GL_DEPTH_TEST);
 
-    // SHADER PROGRAM
-    Shader ourShader("shader.vs", "shader.fs");
+    // ----- SHADER PROGRAM (build and compile)
 
-    // VERTEX DATA (copy in vertex buffer, then processing method)
+    Shader ourShaderProgram("shader.vs", "shader.fs");
+
+    // ----- VERTEX DATA (copy in vertex buffer, then processing method)
 
     // Vertices representing a cube 
     float vertices[] = {
@@ -105,6 +107,7 @@ int main()
      -0.5f,  0.5f, -0.5f,  0.0f, 1.0f
     };
 
+    // Positions of 10 cubes 
     glm::vec3 cubePositions[] = {
     glm::vec3(0.0f,  0.0f,  0.0f),
     glm::vec3(2.0f,  5.0f, -15.0f),
@@ -118,41 +121,49 @@ int main()
     glm::vec3(-1.3f,  1.0f, -1.5f)
     };
 
-    // Generate 1 vertex array, 1 vertex buffer, each with a unique ID 
+    // ----- VAO AND VBO
+
+    // Setup vertex buffer and configure vertex attributes 
     unsigned int VAO, VBO;
     glGenVertexArrays(1, &VAO);
     glGenBuffers(1, &VBO);
 
-    // Bind the Vertex Array Object first
+    // Bind Vertex Array Object 1st. Any VBO, EBO or calls to glVertexAttribPointer and glEnableVertexAttribArray 
+    // will be stored in the currently-bound VAO
     glBindVertexArray(VAO);
 
-    // Copy vertex data in buffer's memory. The VAO will save the config of the bound VBO.
+    // Copy vertex data in vertex buffer. The VAO will save the config of the bound VBO.
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
-    // Tell OpenGL how the vertex data should be processed
+    // Tell OpenGL how the vertex attributes are stored in one vertex
+    // glVertexAttribPointer(attributePos, nbChannelsInAttribute, dataType, shouldDataBeNormalised, strideAttribLength, offsetWhereAttribBegins)
+    // Position attribute
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
     glad_glEnableVertexAttribArray(0);
+    // Texture attribute
     glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
     glad_glEnableVertexAttribArray(1);
 
-    // TEXTURE 1
+    // ----- TEXTURE 1
 
-    // Generate a texture object and bind it
+    // Create 2D texture object
     unsigned int texture1;
     glGenTextures(1, &texture1);
     glBindTexture(GL_TEXTURE_2D, texture1);
-    // Texture wrapping parameters
+    // Texture wrapping parameters: what to do if texture coords are beyond (0,0) and (1,1)
+    // S and T are the axes of the texture-coord space
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    // Texture filtering parameters
+    // Texture filtering parameters: which method for matching one texture pixel (texel) with one texture coord
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-    // Load image 1
+    // Load image that will be attached to texture 1
     int width, height, nrChannels;
     unsigned char* data = stbi_load("../textures/container.jpg", &width, &height, &nrChannels, 0);
     
+    // Attach image to texture object and create a mipmap based on the texture
     if (data)
     {
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
@@ -166,24 +177,21 @@ int main()
     // Free image memory
     stbi_image_free(data);
 
-    // TEXTURE 2
+    // ----- TEXTURE 2
 
-    // Generate a texture object and bind it
     unsigned int texture2;
     glGenTextures(1, &texture2);
     glBindTexture(GL_TEXTURE_2D, texture2);
-    // set the texture wrapping/filtering options (on the currently bound texture object)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-    // Load image 2
     data = stbi_load("../textures/awesomeface.png", &width, &height, &nrChannels, 0);
 
     if (data)
     {
-        // Diff w/ image1 (jpg): image2 = png so it contains an alpha channel, so we use the GL_RGBA option now
+        // Difference w/ image1 (jpg): image2 (png) so it contains an alpha channel --> we use the GL_RGBA option
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
         glGenerateMipmap(GL_TEXTURE_2D);
     }
@@ -192,30 +200,38 @@ int main()
         std::cout << "Failed to load texture" << std::endl;
     }
 
-    // Free image memory
     stbi_image_free(data);
 
-    ourShader.use();
-    ourShader.setInt("texture1", 0);
-    ourShader.setInt("texture2", 1);
+    // Tell opengl which texture unit each sampler belongs to (only has to be done once)
+    ourShaderProgram.use();
+    // texture1 goes into texture unit 0 and texture2 into texture unit 1 (multiple textures are applied to the frag shader)
+    ourShaderProgram.setInt("texture1", 0);
+    ourShaderProgram.setInt("texture2", 1);
 
-    // RENDER LOOP
+    // ----- RENDER LOOP
+
     while (!glfwWindowShouldClose(window))
     {
+        // ----- WINDOW
+
         processInput(window);
 
         // Clear the frame and depth buffers and apply new color to window
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        // Activate texture units and bind corresponding texture
+        // ----- TEXTURES
+
+        // Bind both textures to their corresponding texture unit
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, texture1);
         glActiveTexture(GL_TEXTURE1);
         glBindTexture(GL_TEXTURE_2D, texture2);
 
         // Activate shader
-        ourShader.use();
+        ourShaderProgram.use();
+
+        // ----- TRANSFORMS
 
         // create transformations
         glm::mat4 model = glm::mat4(1.0f); // make sure to initialize matrix to identity matrix first
@@ -225,29 +241,34 @@ int main()
         view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
         projection = glm::perspective(glm::radians(45.0f), (float)SCREEN_WIDTH / (float)SCREEN_HEIGHT, 0.1f, 100.0f);
         // retrieve the matrix uniform locations
-        unsigned int modelLoc = glGetUniformLocation(ourShader.m_ID, "model");
-        unsigned int viewLoc = glGetUniformLocation(ourShader.m_ID, "view");
+        unsigned int modelLoc = glGetUniformLocation(ourShaderProgram.m_ID, "model");
+        unsigned int viewLoc = glGetUniformLocation(ourShaderProgram.m_ID, "view");
         // pass them to the shaders (3 different ways)
         glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
         glUniformMatrix4fv(viewLoc, 1, GL_FALSE, &view[0][0]);
-        // note: currently we set the projection matrix each frame, but since the projection matrix rarely changes it's often best practice to set it outside the main loop only once.
-        ourShader.setMat4("projection", projection);
+        // note: currently we set the projection matrix each frame, but since the projection matrix rarely changes 
+        // it's often best practice to set it outside the main loop only once.
+        ourShaderProgram.setMat4("projection", projection);
 
         glBindVertexArray(VAO);
+
+        // ----- DRAW CALL
+
         for (unsigned int i = 0; i < 10; i++)
         {
             glm::mat4 model = glm::mat4(1.0f);
             model = glm::translate(model, cubePositions[i]);
             float angle = 20.0f * i;
             model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
-            ourShader.setMat4("model", model);
+            ourShaderProgram.setMat4("model", model);
 
             glDrawArrays(GL_TRIANGLES, 0, 36);
         }
 
         // Swap front (img displayed on screen) and back (img being rendered) buffers to render img without flickering effect
         glfwSwapBuffers(window);
-        // Check for events (keyboard, mouse etc), updates window state, calls corresponding functions (which we can register via callback methods) 
+        // Check for events (keyboard, mouse etc), updates window state, calls corresponding functions 
+        // (which we can register via callback methods) 
         glfwPollEvents();
     }
 
