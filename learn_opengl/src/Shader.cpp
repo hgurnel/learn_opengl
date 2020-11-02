@@ -4,8 +4,8 @@ Shader::Shader(const char* vertexPath, const char* fragmentPath, const char* geo
 {
     // 1. retrieve the vertex/fragment source code from filePath
     
-    std::string vertexCode;
-    std::string fragmentCode;
+    std::string vertexSourceString;
+    std::string fragmentSourceString;
     std::string geometryCode;
     std::ifstream vShaderFile;
     std::ifstream fShaderFile;
@@ -27,8 +27,8 @@ Shader::Shader(const char* vertexPath, const char* fragmentPath, const char* geo
         vShaderFile.close();
         fShaderFile.close();
         // convert stream into string
-        vertexCode = vShaderStream.str();
-        fragmentCode = fShaderStream.str();
+        vertexSourceString = vShaderStream.str();
+        fragmentSourceString = fShaderStream.str();
         // if geometry shader path is present, also load a geometry shader
         if (geometryPath != nullptr)
         {
@@ -43,49 +43,51 @@ Shader::Shader(const char* vertexPath, const char* fragmentPath, const char* geo
     {
         std::cout << "ERROR::SHADER::FILE_NOT_SUCCESFULLY_READ" << std::endl;
     }
-    const char* vShaderCode = vertexCode.c_str();
-    const char* fShaderCode = fragmentCode.c_str();
+
+    const char* vertexSource = vertexSourceString.c_str();
+    const char* fragmentSource = fragmentSourceString.c_str();
     
     // 2. compile shaders
-    unsigned int vertex, fragment;
+
+    unsigned int vertexID, fragmentID;
     
     // vertex shader
-    vertex = glCreateShader(GL_VERTEX_SHADER);
-    glShaderSource(vertex, 1, &vShaderCode, NULL);
-    glCompileShader(vertex);
-    checkCompileErrors(vertex, "VERTEX");
+    vertexID = glCreateShader(GL_VERTEX_SHADER);
+    glShaderSource(vertexID, 1, &vertexSource, NULL);
+    glCompileShader(vertexID);
+    checkCompileErrors(vertexID, "VERTEX");
     
     // fragment Shader
-    fragment = glCreateShader(GL_FRAGMENT_SHADER);
-    glShaderSource(fragment, 1, &fShaderCode, NULL);
-    glCompileShader(fragment);
-    checkCompileErrors(fragment, "FRAGMENT");
+    fragmentID = glCreateShader(GL_FRAGMENT_SHADER);
+    glShaderSource(fragmentID, 1, &fragmentSource, NULL);
+    glCompileShader(fragmentID);
+    checkCompileErrors(fragmentID, "FRAGMENT");
     
     // if geometry shader is given, compile geometry shader
-    unsigned int geometry;
+    unsigned int geometryID;
     if (geometryPath != nullptr)
     {
         const char* gShaderCode = geometryCode.c_str();
-        geometry = glCreateShader(GL_GEOMETRY_SHADER);
-        glShaderSource(geometry, 1, &gShaderCode, NULL);
-        glCompileShader(geometry);
-        checkCompileErrors(geometry, "GEOMETRY");
+        geometryID = glCreateShader(GL_GEOMETRY_SHADER);
+        glShaderSource(geometryID, 1, &gShaderCode, NULL);
+        glCompileShader(geometryID);
+        checkCompileErrors(geometryID, "GEOMETRY");
     }
     
     // shader Program
     m_ID = glCreateProgram();
-    glAttachShader(m_ID, vertex);
-    glAttachShader(m_ID, fragment);
+    glAttachShader(m_ID, vertexID);
+    glAttachShader(m_ID, fragmentID);
     if (geometryPath != nullptr)
-        glAttachShader(m_ID, geometry);
+        glAttachShader(m_ID, geometryID);
     glLinkProgram(m_ID);
     checkCompileErrors(m_ID, "PROGRAM");
     
     // delete the shaders as they're linked into our program now and no longer necessery
-    glDeleteShader(vertex);
-    glDeleteShader(fragment);
+    glDeleteShader(vertexID);
+    glDeleteShader(fragmentID);
     if (geometryPath != nullptr)
-        glDeleteShader(geometry);
+        glDeleteShader(geometryID);
 };
 
 void Shader::use()
@@ -94,7 +96,6 @@ void Shader::use()
 }
 
 // utility uniform functions
-// ------------------------------------------------------------------------
 void Shader::setBool(const std::string& name, bool value) const
 {
     glUniform1i(glGetUniformLocation(m_ID, name.c_str()), (int)value);

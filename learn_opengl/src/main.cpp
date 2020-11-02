@@ -4,7 +4,7 @@
 #include "GLFW/glfw3.h"
 #include "../header/stb_image.h"
 
-// CAUTION (GLM has a coluém-major convention): (COL, ROW) and not (row, col) as usual
+// CAUTION (GLM has a column-major convention): (COL, ROW) and not (row, col) as usual
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
@@ -16,22 +16,20 @@
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void processInput(GLFWwindow* window);
 
-
 // Settings
-const unsigned int SCREEN_WIDTH = 800;
-const unsigned int SCREEN_HEIGHT = 600;
-
-// Percentage of mix between the two textures
-float mixPercent = 0.0;
+const unsigned int SCREEN_WIDTH = 1920;
+const unsigned int SCREEN_HEIGHT = 1080;
 
 
 int main()
 {
-    // Window init 
+    //  ----- WINDOW 
+
     glfwInit();
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-    // Use core profile to get access to a smaller subset of OpenGL features without backwards-compatible features we no longer need
+    // Use core profile to get access to a smaller subset of OpenGL features without 
+    // backwards-compatible features we no longer need
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
     // Window creation
@@ -56,69 +54,116 @@ int main()
         return -1;
     }
 
-    // SHADER PROGRAM
-    Shader ourShader("shader.vs", "shader.fs");
+    glEnable(GL_DEPTH_TEST);
 
-    // VERTEX DATA (copy in vertex buffer, then processing method)
+    // ----- SHADER PROGRAM (build and compile)
 
-// Vertices representing a rectangle 
+    Shader ourShaderProgram("shader.vs", "shader.fs");
+
+    // ----- VERTEX DATA (copy in vertex buffer, then processing method)
+
+    // Vertices representing a cube 
     float vertices[] = {
-        // positions          // colors           // texture coords (note that we changed them to 'zoom in' on our texture image)
-         0.5f,  0.5f, 0.0f,   1.0f, 0.0f, 0.0f,   1.0f, 1.0f, // top right
-         0.5f, -0.5f, 0.0f,   0.0f, 1.0f, 0.0f,   1.0f, 0.0f, // bottom right
-        -0.5f, -0.5f, 0.0f,   0.0f, 0.0f, 1.0f,   0.0f, 0.0f, // bottom left
-        -0.5f,  0.5f, 0.0f,   1.0f, 1.0f, 0.0f,   0.0f, 1.0f  // top left 
+     -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
+      0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
+      0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+      0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+     -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
+     -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
+
+     -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+      0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+      0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
+      0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
+     -0.5f,  0.5f,  0.5f,  0.0f, 1.0f,
+     -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+
+     -0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+     -0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+     -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+     -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+     -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+     -0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+
+      0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+      0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+      0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+      0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+      0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+      0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+
+     -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+      0.5f, -0.5f, -0.5f,  1.0f, 1.0f,
+      0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+      0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+     -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+     -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+
+     -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
+      0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+      0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+      0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+     -0.5f,  0.5f,  0.5f,  0.0f, 0.0f,
+     -0.5f,  0.5f, -0.5f,  0.0f, 1.0f
     };
 
-    unsigned int indices[] =
-    {
-        0, 1, 3,  // first triangle
-        1, 2, 3   // second triangle
+    // Positions of 10 cubes 
+    glm::vec3 cubePositions[] = {
+    glm::vec3(0.0f,  0.0f,  0.0f),
+    glm::vec3(2.0f,  5.0f, -15.0f),
+    glm::vec3(-1.5f, -2.2f, -2.5f),
+    glm::vec3(-3.8f, -2.0f, -12.3f),
+    glm::vec3(2.4f, -0.4f, -3.5f),
+    glm::vec3(-1.7f,  3.0f, -7.5f),
+    glm::vec3(1.3f, -2.0f, -2.5f),
+    glm::vec3(1.5f,  2.0f, -2.5f),
+    glm::vec3(1.5f,  0.2f, -1.5f),
+    glm::vec3(-1.3f,  1.0f, -1.5f)
     };
 
-    // Generate 1 vertex array, 1 vertex buffer and 1 element buffer, each with a unique ID 
-    unsigned int VAO, VBO, EBO;
+    // ----- VAO AND VBO
+
+    // Setup vertex buffer and configure vertex attributes 
+    unsigned int VAO, VBO;
     glGenVertexArrays(1, &VAO);
     glGenBuffers(1, &VBO);
-    glGenBuffers(1, &EBO);
-    // Bind the Vertex Array Object first
+
+    // Bind Vertex Array Object 1st. Any VBO, EBO or calls to glVertexAttribPointer and glEnableVertexAttribArray 
+    // will be stored in the currently-bound VAO
     glBindVertexArray(VAO);
 
-    // Copy vertex data in buffer's memory. The VAO will save the config of the bound VBO.
+    // Copy vertex data in vertex buffer. The VAO will save the config of the bound VBO.
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
-
-    // Tell OpenGL how the vertex data should be processed
-    // Position attribute (location = 0)
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
+    // Tell OpenGL how the vertex attributes are stored in one vertex
+    // glVertexAttribPointer(attributePos, nbChannelsInAttribute, dataType, shouldDataBeNormalised, strideAttribLength, offsetWhereAttribBegins)
+    // Position attribute
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
     glad_glEnableVertexAttribArray(0);
-    // Color attribute (location = 1)
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
+    // Texture attribute
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
     glad_glEnableVertexAttribArray(1);
-    // Texture attribute (location = 2)
-    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
-    glad_glEnableVertexAttribArray(2);
 
-    // TEXTURE 1
+    // ----- TEXTURE 1
 
-    // Generate a texture object and bind it
+    // Create 2D texture object
     unsigned int texture1;
     glGenTextures(1, &texture1);
     glBindTexture(GL_TEXTURE_2D, texture1);
-    // Texture wrapping parameters
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
-    // Texture filtering parameters
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    // Texture wrapping parameters: what to do if texture coords are beyond (0,0) and (1,1)
+    // S and T are the axes of the texture-coord space
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    // Texture filtering parameters: which method for matching one texture pixel (texel) with one texture coord
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-    // Load image 1
+    // Load image that will be attached to texture 1
     int width, height, nrChannels;
     unsigned char* data = stbi_load("../textures/container.jpg", &width, &height, &nrChannels, 0);
     
+    // Attach image to texture object and create a mipmap based on the texture
     if (data)
     {
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
@@ -132,25 +177,21 @@ int main()
     // Free image memory
     stbi_image_free(data);
 
-    // TEXTURE 2
+    // ----- TEXTURE 2
 
-    // Generate a texture object and bind it
     unsigned int texture2;
     glGenTextures(1, &texture2);
     glBindTexture(GL_TEXTURE_2D, texture2);
-    // set the texture wrapping/filtering options (on the currently bound texture object)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-    // Load image 2
-    stbi_set_flip_vertically_on_load(true);
     data = stbi_load("../textures/awesomeface.png", &width, &height, &nrChannels, 0);
 
     if (data)
     {
-        // Diff w/ image1 (jpg): image2 = png so it contains an alpha channel, so we use the GL_RGBA option now
+        // Difference w/ image1 (jpg): image2 (png) so it contains an alpha channel --> we use the GL_RGBA option
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
         glGenerateMipmap(GL_TEXTURE_2D);
     }
@@ -159,74 +200,90 @@ int main()
         std::cout << "Failed to load texture" << std::endl;
     }
 
-    // Free image memory
     stbi_image_free(data);
 
-    ourShader.use();
-    // Tell OpenGL to which texture unit each shader sampler belongs to
-    glUniform1i(glGetUniformLocation(ourShader.m_ID, "fsTexture1"), 0); // manual setting
-    ourShader.setInt("fsTexture2", 1); // setting through shader class
+    // Tell opengl which texture unit each sampler belongs to (only has to be done once)
+    ourShaderProgram.use();
+    // texture1 goes into texture unit 0 and texture2 into texture unit 1 (multiple textures are applied to the frag shader)
+    ourShaderProgram.setInt("texture1", 0);
+    ourShaderProgram.setInt("texture2", 1);
 
-    // RENDER LOOP
+    // ----- RENDER LOOP
+
     while (!glfwWindowShouldClose(window))
     {
+        // ----- WINDOW
+
         processInput(window);
 
-        // Clear the frame buffer and apply new color to window
+        // Clear the frame and depth buffers and apply new color to window
+        // The depth buffer (z-buffer) contains the depth (z coord) of each fragment
+        // The z-buffer should be cleared at each new render. Depths are considered only for the current frame.
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        // Activate texture units and bing corresponding texture
+        // ----- TEXTURES
+
+        // Bind both textures to their corresponding texture unit
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, texture1);
         glActiveTexture(GL_TEXTURE1);
         glBindTexture(GL_TEXTURE_2D, texture2);
 
-        ourShader.use();
+        // Activate shader program
+        ourShaderProgram.use();
 
-        // Change percentage of mix between the two texture
-        ourShader.setFloat("mixPercentage", mixPercent);
+        // ----- TRANSFORMS
 
-        // TRANSFORM 1
+        // create transforms (make sure to initialize matrix to identity matrix first)
+        glm::mat4 model =       glm::mat4(1.0f);
+        glm::mat4 view =        glm::mat4(1.0f);
+        glm::mat4 projection =  glm::mat4(1.0f);
+        // Model (local->world)(defined later), view (world->view), projection (view->clip)
+        view =          glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
+        projection =    glm::perspective(glm::radians(45.0f), (float)SCREEN_WIDTH / (float)SCREEN_HEIGHT, 0.1f, 100.0f);
+        // retrieve the matrix uniform locations
+        unsigned int modelLoc = glGetUniformLocation(ourShaderProgram.m_ID, "model");
+        unsigned int viewLoc = glGetUniformLocation(ourShaderProgram.m_ID, "view");
+        // pass view and projection matrices to the shader program (2 ways)
+        glUniformMatrix4fv(viewLoc, 1, GL_FALSE, &view[0][0]);
+        // note: currently we set the projection matrix each frame, but since the projection matrix rarely changes 
+        // it's often best practice to set it outside the main loop only once.
+        ourShaderProgram.setMat4("projection", projection);
 
-        // CAUTION: the first transfo to be applied is the last one, so here it is the rotation
-        glm::mat4 transform = glm::mat4(1.0f);
-        transform = glm::translate(transform, glm::vec3(0.5f, -0.5f, 0.0f));
-        transform = glm::rotate(transform, (float)glfwGetTime(), glm::vec3(0.0f, 0.0f, 1.0f));
+        // ----- DRAW CALL
 
-        // Apply transform to rectangle 1
-        unsigned int transformLoc = glGetUniformLocation(ourShader.m_ID, "transform");
-        glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(transform));
-
-        // Draw the first rectangle
         glBindVertexArray(VAO);
-        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
-        // TRANSFORM 2
-        
-        // Reset transform
-        transform = glm::mat4(1.0f); 
-        transform = glm::translate(transform, glm::vec3(-0.5f, 0.5f, 0.0f));
-        float timeValue = glfwGetTime();
-        float scaleAmount = (sin(timeValue) / 2.0f) + 0.5f;
-        transform = glm::scale(transform, glm::vec3(scaleAmount, scaleAmount, 1.0f));
+        // One draw call is made for each cube, with a different model matrix each time
+        // A different model matrix is sent to the vertex shader each time
+        for (unsigned int i = 0; i < 10; i++)
+        {
+            glm::mat4 model = glm::mat4(1.0f);
+            model = glm::translate(model, cubePositions[i]);
 
-        // Apply transform to rectangle 2
-        // this time take the matrix value array's first element as its memory pointer value
-        glUniformMatrix4fv(transformLoc, 1, GL_FALSE, &transform[0][0]); 
-        // Once the uniform matrix was updated, draw the second rectangle
-        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+            // Make every 3rd cube rotate
+            if (i % 3 == 0)
+            {
+                float angle = glfwGetTime()*20.0;
+                model = glm::rotate(model, glm::radians(angle), glm::vec3(0.0f, 0.0f, 1.0f));
+            }
+            
+            ourShaderProgram.setMat4("model", model);
+
+            glDrawArrays(GL_TRIANGLES, 0, 36);
+        }
 
         // Swap front (img displayed on screen) and back (img being rendered) buffers to render img without flickering effect
         glfwSwapBuffers(window);
-        // Check for events (keyboard, mouse etc), updates window state, calls corresponding functions (which we can register via callback methods) 
+        // Check for events (keyboard, mouse etc), updates window state, calls corresponding functions 
+        // (which we can register via callback methods) 
         glfwPollEvents();
     }
 
     // Optional: de-allocate resources
     glDeleteVertexArrays(1, &VAO);
     glDeleteBuffers(1, &VBO);
-    glDeleteBuffers(1, &EBO);
 
     // Delete all of GLFW's resources that were allocated
     glfwTerminate();
@@ -243,18 +300,6 @@ void processInput(GLFWwindow* window)
         glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
     if (glfwGetKey(window, GLFW_KEY_2) == GLFW_PRESS)
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-    if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
-    {
-        mixPercent += 0.001f; // change this value accordingly (might be too slow or too fast based on system hardware)
-        if (mixPercent >= 1.0f)
-            mixPercent = 1.0f;
-    }
-    if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
-    {
-        mixPercent -= 0.001f; // change this value accordingly (might be too slow or too fast based on system hardware)
-        if (mixPercent <= 0.0f)
-            mixPercent = 0.0f;
-    }
 }
 
 // Callback fct that is called every time the window is resized

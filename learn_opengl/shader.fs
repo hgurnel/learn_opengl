@@ -1,15 +1,17 @@
 #version 330 core
-out vec4 FragColor;
 
-in vec3 ourColor;
 in vec2 TexCoord;
 
-uniform sampler2D fsTexture1;
-uniform sampler2D fsTexture2;
-uniform float mixPercentage;
+out vec4 FragColor;
+
+// texture samplers, in order to pass texture objects (created in the main) to the frag shader
+// A sampler is a built-in data type for texture objects
+uniform sampler2D texture1;
+uniform sampler2D texture2;
 
 void main()
 {
-    // FragColor = mix(texture(fsTexture1, TexCoord), texture(fsTexture2, TexCoord*vec2(-1.0, 1.0)), 0.2);
-    FragColor = mix(texture(fsTexture1, TexCoord), texture(fsTexture2, vec2(1.0 - TexCoord.x, TexCoord.y)), mixPercentage);
+	// texture(textureSampler, textureCoord) = GLSL's built-in texture fct 
+	// linearly interpolate between both textures (80% rectangular container, 20% smiley). 0.0 displays only texture1.
+	FragColor = mix(texture(texture1, TexCoord), texture(texture2, TexCoord), 0.2);
 }

@@ -12,7 +12,7 @@
 class Shader
 {
 public:
-	// The ID of the program
+	// ID of the shader program
 	unsigned int m_ID;
 
 	// Ctor
