@@ -17,8 +17,8 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void processInput(GLFWwindow* window);
 
 // Settings
-const unsigned int SCREEN_WIDTH = 1920;
-const unsigned int SCREEN_HEIGHT = 1080;
+const unsigned int SCREEN_WIDTH = 800;
+const unsigned int SCREEN_HEIGHT = 600;
 
 
 int main()
@@ -240,7 +240,7 @@ int main()
         glm::mat4 view =        glm::mat4(1.0f);
         glm::mat4 projection =  glm::mat4(1.0f);
         // Model (local->world)(defined later), view (world->view), projection (view->clip)
-        view =          glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
+        view =          glm::translate(view, glm::vec3(0.0f, 3.0f, -3.0f));
         projection =    glm::perspective(glm::radians(90.0f), (float)SCREEN_WIDTH / (float)SCREEN_HEIGHT, 0.1f, 100.0f);
         // retrieve the matrix uniform locations
         unsigned int modelLoc = glGetUniformLocation(ourShaderProgram.m_ID, "model");
