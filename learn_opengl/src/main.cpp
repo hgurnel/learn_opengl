@@ -21,6 +21,12 @@ void processInput(GLFWwindow* window);
 const unsigned int SCREEN_WIDTH = 1920;
 const unsigned int SCREEN_HEIGHT = 1080;
 
+// ----- CAMERA
+
+glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, 3.0f);
+glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
+glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
+
 
 int main()
 {
@@ -238,14 +244,11 @@ int main()
 
         // ----- TRANSFORMS
 
-        // View matrix (camera)
-        const float radius = 10.0f;
-        float camX = sin(glfwGetTime()) * radius;
-        float camZ = cos(glfwGetTime()) * radius;
-        glm::mat4 view;
-        view = glm::lookAt(glm::vec3(camX, 0.0f, camZ),    // camera position
-            glm::vec3(0.0f, 0.0f, 0.0f),    // camera target (world origin)
-            glm::vec3(0.0f, 1.0f, 0.0f));   // up vector
+        // Model matrix (use in the draw call)
+        unsigned int modelLoc = glGetUniformLocation(ourShaderProgram.m_ID, "model");
+
+        // View matrix
+        glm::mat4 view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
         ourShaderProgram.setMat4("view", view);
 
         // Projection matrix
@@ -254,10 +257,7 @@ int main()
         // pass projection matrices to the shader program
         // note: currently we set the projection matrix each frame, but since the projection matrix rarely changes 
         // it's often best practice to set it outside the main loop only once.
-        ourShaderProgram.setMat4("projection", projection);
-        
-        // Model matrix (use in the draw call)
-        unsigned int modelLoc = glGetUniformLocation(ourShaderProgram.m_ID, "model");
+        ourShaderProgram.setMat4("projection", projection);       
 
         // ----- DRAW CALL
 
@@ -308,6 +308,18 @@ void processInput(GLFWwindow* window)
         glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
     if (glfwGetKey(window, GLFW_KEY_2) == GLFW_PRESS)
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+    
+    // ----- CAMERA MOVEMENTS
+    
+    const float cameraSpeed = 0.005f;
+    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+        cameraPos += cameraSpeed * cameraFront;
+    if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+        cameraPos -= cameraSpeed * cameraFront;
+    if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+        cameraPos -= glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
+    if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+        cameraPos += glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
 }
 
 // Callback fct that is called every time the window is resized
