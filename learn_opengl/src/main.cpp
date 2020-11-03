@@ -54,6 +54,18 @@ int main()
         return -1;
     }
 
+    // ----- CAMERA
+
+    glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, 3.0f);
+    glm::vec3 cameraTarget = glm::vec3(0.0f, 0.0f, 0.0f);
+    // The subtraction gives a vector along +z (world origin -> camera)
+    glm::vec3 cameraDirection = glm::normalize(cameraPos - cameraTarget);
+    glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f);
+    glm::vec3 cameraRight = glm::normalize(glm::cross(up, cameraDirection));
+    glm::vec3 cameraUp = glm::normalize(glm::cross(cameraDirection, cameraRight));
+
+    // ----- Z BUFFER 
+    
     glEnable(GL_DEPTH_TEST);
 
     // ----- SHADER PROGRAM (build and compile)
