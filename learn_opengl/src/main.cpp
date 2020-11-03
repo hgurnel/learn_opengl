@@ -26,6 +26,9 @@ const unsigned int SCREEN_HEIGHT = 1080;
 glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, 3.0f);
 glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
 glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
+// Delta time (to have the same camera speed regardless of the computer the code is run on)
+float deltaTime = 0.0f;
+float lastFrame = 0.0f;
 
 
 int main()
@@ -257,7 +260,13 @@ int main()
         // pass projection matrices to the shader program
         // note: currently we set the projection matrix each frame, but since the projection matrix rarely changes 
         // it's often best practice to set it outside the main loop only once.
-        ourShaderProgram.setMat4("projection", projection);       
+        ourShaderProgram.setMat4("projection", projection);   
+
+        // ----- DELTA TIME UPDATE
+
+        float currentFrame = glfwGetTime();
+        deltaTime = currentFrame - lastFrame;
+        lastFrame = currentFrame;
 
         // ----- DRAW CALL
 
@@ -311,7 +320,8 @@ void processInput(GLFWwindow* window)
     
     // ----- CAMERA MOVEMENTS
     
-    const float cameraSpeed = 0.005f;
+    float cameraSpeed = 2.5f * deltaTime;
+
     if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
         cameraPos += cameraSpeed * cameraFront;
     if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
