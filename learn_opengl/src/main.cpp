@@ -39,8 +39,11 @@ float pitch = 0.0f;
 float deltaTime = 0.0f;
 float lastFrame = 0.0f;
 
+// ----- MOUSE
+
 // Last XY positions of the mouse, init to be at the centre of the window
 float lastX = SCREEN_WIDTH / 2.0f, lastY = SCREEN_HEIGHT / 2.0f;
+bool firstMouse = true;
 
 
 int main()
@@ -271,12 +274,6 @@ int main()
         unsigned int modelLoc = glGetUniformLocation(ourShaderProgram.m_ID, "model");
 
         // VIEW matrix (regardless of its position, it will always look in the direction of cameraFront)
-        glm::vec3 direction;
-        direction.x = cos(glm::radians(yaw));
-        direction.y = sin(glm::radians(pitch));
-        direction.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
-        cameraFront = glm::normalize(direction);
-
         glm::mat4 view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
         ourShaderProgram.setMat4("view", view);
 
@@ -366,6 +363,13 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 
 void mouse_callback(GLFWwindow* window, double xpos, double ypos)
 {
+    if (firstMouse)
+    {
+        lastX = xpos;
+        lastY = ypos;
+        firstMouse = false;
+    }
+
     float xoffset = xpos - lastX;
     float yoffset = lastY - ypos; // reversed since y-coordinates range from bottom to top
     lastX = xpos;
@@ -382,4 +386,10 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos)
         pitch = 89.0f;
     if (pitch < -89.0f)
         pitch = -89.0f;
+    
+    glm::vec3 direction;
+    direction.x = cos(glm::radians(yaw));
+    direction.y = sin(glm::radians(pitch));
+    direction.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
+    cameraFront = glm::normalize(direction);
 }
