@@ -13,6 +13,7 @@
 
 #include <iostream>
 
+// Callback fcts
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void processInput(GLFWwindow* window);
 
@@ -63,6 +64,11 @@ int main()
     glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f);
     glm::vec3 cameraRight = glm::normalize(glm::cross(up, cameraDirection));
     glm::vec3 cameraUp = glm::normalize(glm::cross(cameraDirection, cameraRight));
+    // View matrix 
+    glm::mat4 view;
+    view = glm::lookAt( glm::vec3(0.0f, 0.0f, 3.0f),    // camera position
+                        glm::vec3(0.0f, 0.0f, 0.0f),    // camera target (world origin)
+                        glm::vec3(0.0f, 1.0f, 0.0f));   // up vector
 
     // ----- Z BUFFER 
     
