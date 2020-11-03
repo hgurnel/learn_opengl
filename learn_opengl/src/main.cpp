@@ -17,6 +17,7 @@
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void processInput(GLFWwindow* window);
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
+void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 
 // Settings
 const unsigned int SCREEN_WIDTH = 1920;
@@ -29,6 +30,8 @@ glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
 glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
 
 float fov = 45.0f;
+float nearPlane = 0.1f;
+float farPlane = 100.0f;
 
 // yaw is initialized to -90.0 degrees since a yaw of 0.0 results in 
 // a direction vector pointing to the right, so we initially rotate a bit to the left.
@@ -74,6 +77,7 @@ int main()
 
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
     glfwSetCursorPosCallback(window, mouse_callback);
+    glfwSetScrollCallback(window, scroll_callback);
 
     // ----- GLAD: load OpenGL function pointers
 
@@ -272,18 +276,17 @@ int main()
 
         // MODEL matrix (use in the draw call)
         unsigned int modelLoc = glGetUniformLocation(ourShaderProgram.m_ID, "model");
-
-        // VIEW matrix (regardless of its position, it will always look in the direction of cameraFront)
-        glm::mat4 view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
-        ourShaderProgram.setMat4("view", view);
-
+        
         // PROJECTION matrix
-        glm::mat4 projection =  glm::mat4(1.0f);        
-        projection = glm::perspective(glm::radians(fov), (float)SCREEN_WIDTH / (float)SCREEN_HEIGHT, 0.1f, 100.0f);
+        glm::mat4 projection =  glm::perspective(glm::radians(fov), (float)SCREEN_WIDTH / (float)SCREEN_HEIGHT, nearPlane, farPlane);
         // pass projection matrices to the shader program
         // note: currently we set the projection matrix each frame, but since the projection matrix rarely changes 
         // it's often best practice to set it outside the main loop only once.
         ourShaderProgram.setMat4("projection", projection);   
+
+        // VIEW matrix (regardless of its position, it will always look in the direction of cameraFront)
+        glm::mat4 view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
+        ourShaderProgram.setMat4("view", view);
 
         // ----- DELTA TIME UPDATE
 
@@ -392,4 +395,13 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos)
     direction.y = sin(glm::radians(pitch));
     direction.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
     cameraFront = glm::normalize(direction);
+}
+
+void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
+{
+    fov -= (float)yoffset * 2.0;
+    if (fov < 1.0f)
+        fov = 1.0f;
+    if (fov > 45.0f)
+        fov = 45.0f;
 }
