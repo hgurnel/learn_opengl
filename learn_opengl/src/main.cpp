@@ -246,20 +246,18 @@ int main()
         view = glm::lookAt(glm::vec3(camX, 0.0f, camZ),    // camera position
             glm::vec3(0.0f, 0.0f, 0.0f),    // camera target (world origin)
             glm::vec3(0.0f, 1.0f, 0.0f));   // up vector
+        ourShaderProgram.setMat4("view", view);
 
-        // create transforms (make sure to initialize matrix to identity matrix first)
-        glm::mat4 model =       glm::mat4(1.0f);
-        glm::mat4 projection =  glm::mat4(1.0f);
-        // Model (local->world)(defined later), view (world->view), projection (view->clip)
-        projection =    glm::perspective(glm::radians(45.0f), (float)SCREEN_WIDTH / (float)SCREEN_HEIGHT, 0.1f, 100.0f);
-        // retrieve the matrix uniform locations
-        unsigned int modelLoc = glGetUniformLocation(ourShaderProgram.m_ID, "model");
-        unsigned int viewLoc = glGetUniformLocation(ourShaderProgram.m_ID, "view");
-        // pass view and projection matrices to the shader program (2 ways)
-        glUniformMatrix4fv(viewLoc, 1, GL_FALSE, &view[0][0]);
+        // Projection matrix
+        glm::mat4 projection =  glm::mat4(1.0f);        
+        projection = glm::perspective(glm::radians(45.0f), (float)SCREEN_WIDTH / (float)SCREEN_HEIGHT, 0.1f, 100.0f);
+        // pass projection matrices to the shader program
         // note: currently we set the projection matrix each frame, but since the projection matrix rarely changes 
         // it's often best practice to set it outside the main loop only once.
         ourShaderProgram.setMat4("projection", projection);
+        
+        // Model matrix (use in the draw call)
+        unsigned int modelLoc = glGetUniformLocation(ourShaderProgram.m_ID, "model");
 
         // ----- DRAW CALL
 
