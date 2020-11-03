@@ -247,7 +247,7 @@ int main()
         // Model matrix (use in the draw call)
         unsigned int modelLoc = glGetUniformLocation(ourShaderProgram.m_ID, "model");
 
-        // View matrix
+        // View matrix (regardless of its position, it will always look in the direction of cameraFront)
         glm::mat4 view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
         ourShaderProgram.setMat4("view", view);
 
