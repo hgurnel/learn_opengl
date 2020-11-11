@@ -2,24 +2,25 @@
 // so be sure to include GLAD before other header files that require OpenGL (like GLFW). 
 #include "glad/glad.h"
 #include "GLFW/glfw3.h"
-#include "../header/stb_image.h"
-
 // CAUTION (GLM has a column-major convention): (COL, ROW) and not (row, col) as usual
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-#include "../header/Shader.h"
-
 #include <iostream>
+
+#include "../header/stb_image.h"
+#include "../header/Shader.h"
+#include "../header/Camera.h"
 
 // Callback fcts
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
-void processInput(GLFWwindow* window);
+void processInput(GLFWwindow* window, const Camera &c);
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 
-// Settings
+// ----- WINDOW
+
 const unsigned int SCREEN_WIDTH = 1920;
 const unsigned int SCREEN_HEIGHT = 1080;
 
@@ -29,14 +30,7 @@ glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, 3.0f);
 glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
 glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
 
-float fov = 45.0f;
-float nearPlane = 0.1f;
-float farPlane = 100.0f;
-
-// yaw is initialized to -90.0 degrees since a yaw of 0.0 results in 
-// a direction vector pointing to the right, so we initially rotate a bit to the left.
-float yaw = -90.0f;
-float pitch = 0.0f;
+Camera camera(cameraPos, cameraFront, cameraUp);
 
 // Delta time (to have the same camera speed regardless of the computer the code is run on)
 float deltaTime = 0.0f;
@@ -44,9 +38,20 @@ float lastFrame = 0.0f;
 
 // ----- MOUSE
 
+// yaw is initialized to -90.0 degrees since a yaw of 0.0 results in 
+// a direction vector pointing to the right, so we initially rotate a bit to the left.
+float yaw = -90.0f;
+float pitch = 0.0f;
 // Last XY positions of the mouse, init to be at the centre of the window
-float lastX = SCREEN_WIDTH / 2.0f, lastY = SCREEN_HEIGHT / 2.0f;
-bool firstMouse = true;
+float lastX = SCREEN_WIDTH / 2.0f;
+float lastY = SCREEN_HEIGHT / 2.0f;
+bool isFirstMouse = true;
+
+// ----- PROJECTION MATRIX
+
+float fov = 45.0f;
+float nearPlane = 0.1f;
+float farPlane = 100.0f;
 
 
 int main()
@@ -253,7 +258,7 @@ int main()
     {
         // ----- WINDOW
 
-        processInput(window);
+        processInput(window, camera);
 
         // Clear the frame and depth buffers and apply new color to window
         // The depth buffer (z-buffer) contains the depth (z coord) of each fragment
@@ -284,8 +289,8 @@ int main()
         // it's often best practice to set it outside the main loop only once.
         ourShaderProgram.setMat4("projection", projection);   
 
-        // VIEW matrix (regardless of its position, it will always look in the direction of cameraFront)
-        glm::mat4 view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
+        // VIEW matrix / CAMERA (regardless of its position, the camera will always look in the direction of cameraFront)
+        glm::mat4 view = camera.getView();
         ourShaderProgram.setMat4("view", view);
 
         // ----- DELTA TIME UPDATE
@@ -328,6 +333,8 @@ int main()
     glDeleteVertexArrays(1, &VAO);
     glDeleteBuffers(1, &VBO);
 
+    // ----- FREE MEMORY
+
     // Delete all of GLFW's resources that were allocated
     glfwTerminate();
 
@@ -335,7 +342,7 @@ int main()
 }
 
 
-void processInput(GLFWwindow* window)
+void processInput(GLFWwindow* window, const Camera& c)
 {
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         glfwSetWindowShouldClose(window, true);
@@ -349,13 +356,13 @@ void processInput(GLFWwindow* window)
     float cameraSpeed = 2.5f * deltaTime;
 
     if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-        cameraPos += cameraSpeed * cameraFront;
+        camera.moveForward();
     if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-        cameraPos -= cameraSpeed * cameraFront;
+        camera.moveBackward();
     if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-        cameraPos -= glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
+        camera.moveLeft();
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-        cameraPos += glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
+        camera.moveRight();
 }
 
 // Callback fct that is called every time the window is resized
@@ -366,11 +373,11 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 
 void mouse_callback(GLFWwindow* window, double xpos, double ypos)
 {
-    if (firstMouse)
+    if (isFirstMouse)
     {
         lastX = xpos;
         lastY = ypos;
-        firstMouse = false;
+        isFirstMouse = false;
     }
 
     float xoffset = xpos - lastX;
@@ -389,12 +396,12 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos)
         pitch = 89.0f;
     if (pitch < -89.0f)
         pitch = -89.0f;
-    
+
     glm::vec3 direction;
     direction.x = cos(glm::radians(yaw));
     direction.y = sin(glm::radians(pitch));
     direction.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
-    cameraFront = glm::normalize(direction);
+    camera.setFront(glm::normalize(direction));
 }
 
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
