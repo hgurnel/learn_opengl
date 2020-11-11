@@ -290,14 +290,8 @@ int main()
         ourShaderProgram.setMat4("projection", projection);   
 
         // VIEW matrix / CAMERA (regardless of its position, the camera will always look in the direction of cameraFront)
-        glm::mat4 view = camera.getView();
-        ourShaderProgram.setMat4("view", view);
-
-        // ----- DELTA TIME UPDATE
-
-        float currentFrame = glfwGetTime();
-        deltaTime = currentFrame - lastFrame;
-        lastFrame = currentFrame;
+        camera.setView();
+        ourShaderProgram.setMat4("view", camera.getView());
 
         // ----- DRAW CALL
 
