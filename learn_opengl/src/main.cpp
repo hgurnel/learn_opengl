@@ -22,7 +22,6 @@ const float FAR_PLANE = 100.0f;
 
 const char* PATH_COLOR_VS = "1.colors.vs";
 const char* PATH_COLOR_FS = "1.colors.fs";
-
 const char* PATH_LIGHT_CUBE_VS = "1.light_cube.vs";
 const char* PATH_LIGHT_CUBE_FS = "1.light_cube.fs";
 
@@ -104,8 +103,7 @@ int main()
 
     // Files are written by default in the dir containing "srd" and "header"
     Shader lightingShader(PATH_COLOR_VS, PATH_COLOR_FS);
-    Shader lightCubeShader(PATH_LIGHT_CUBE_VS, PATH_LIGHT_CUBE_FS);
-    
+    Shader lightCubeShader(PATH_LIGHT_CUBE_VS, PATH_LIGHT_CUBE_FS);    
 
     // ----- VERTEX DATA
 
@@ -157,22 +155,30 @@ int main()
 
     // ----- VAO AND VBO for cube container object 
 
-    // Define IDs for vertex buffer object and vertex array object
+    // 1/ Unique IDs for VBO and VAO
     unsigned int VBO, cubeVAO;
     glGenVertexArrays(1, &cubeVAO);
     glGenBuffers(1, &VBO);
 
+    // 2/ Bind VBO
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
+
+    // 3/ Create and init a buffer object's data store
     // STATIC_DRAW: the data store contents will be modified once and used many times
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
+    // 4/ Bind VAO
     // Bind Vertex Array Object 1st. Any VBO, EBO or calls to glVertexAttribPointer and glEnableVertexAttribArray 
     // will be stored in the currently-bound VAO
     glBindVertexArray(cubeVAO);
 
+    // 5/ Structure of the vertex attribute(s)
+    // from docs.GL: define an array of generic vertex attribute data
     // Tell OpenGL how the vertex attributes are stored in one vertex
     // glVertexAttribPointer(attributePos, nbChannelsInAttribute, dataType, shouldDataBeNormalised, strideAttribLength, offsetWhereAttribBegins)
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+    
+    // 6/ Enable attribute(s)
     // Enable position attribute, whose index is 0
     glEnableVertexAttribArray(0);
 
@@ -222,7 +228,7 @@ int main()
         lightingShader.setMat4("projection", projection);
         lightingShader.setMat4("view", view);
 
-        // MODEL matrix (use in the draw call)
+        // MODEL matrix (used in the draw call)
         glm::mat4 model = glm::mat4(1.0f);
         lightingShader.setMat4("model", model);
 
@@ -236,9 +242,10 @@ int main()
         lightCubeShader.use();
         lightCubeShader.setMat4("projection", projection);
         lightCubeShader.setMat4("view", view);
+        // Translate the light source cube to the light source's position and scale it down before rendering it
         model = glm::mat4(1.0f);
         model = glm::translate(model, lightPos);
-        // a smaller cube
+        // A smaller cube
         model = glm::scale(model, glm::vec3(0.2f)); 
         lightCubeShader.setMat4("model", model);
 
