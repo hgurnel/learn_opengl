@@ -34,7 +34,7 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 
 // ----- CAMERA
 
-Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));
+Camera camera(glm::vec3(0.0f, 0.0f, 6.0f));
 
 // ----- MOUSE
 
