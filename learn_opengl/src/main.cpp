@@ -18,6 +18,11 @@ const unsigned int SCR_WIDTH = 1920;
 const unsigned int SCR_HEIGHT = 1080;
 
 // Callback fcts
+const char* PATH_COLOR_VS = "1.colors.vs";
+const char* PATH_COLOR_FS = "1.colors.fs";
+
+const char* PATH_LIGHT_CUBE_VS = "1.light_cube.vs";
+const char* PATH_LIGHT_CUBE_FS = "1.light_cube.fs";
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void processInput(GLFWwindow* window);
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
