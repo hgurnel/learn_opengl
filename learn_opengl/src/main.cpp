@@ -96,8 +96,9 @@ int main()
 
     // ----- SHADER PROGRAMS (build and compile)
 
-    Shader lightingShader("1.colors.vs", "1.colors.fs");
-    Shader lightCubeShader("1.light_cube.vs", "1.light_cube.fs");
+    // Files are written by default in the dir containing "srd" and "header"
+    Shader lightingShader(PATH_COLOR_VS, PATH_COLOR_FS);
+    Shader lightCubeShader(PATH_LIGHT_CUBE_VS, PATH_LIGHT_CUBE_FS);
     
 
     // ----- VERTEX DATA
