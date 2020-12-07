@@ -17,12 +17,17 @@
 const unsigned int SCR_WIDTH = 1920;
 const unsigned int SCR_HEIGHT = 1080;
 
-// Callback fcts
+const float NEAR_PLANE = 0.1f;
+const float FAR_PLANE = 100.0f;
+
 const char* PATH_COLOR_VS = "1.colors.vs";
 const char* PATH_COLOR_FS = "1.colors.fs";
 
 const char* PATH_LIGHT_CUBE_VS = "1.light_cube.vs";
 const char* PATH_LIGHT_CUBE_FS = "1.light_cube.fs";
+
+// ----- CALLBACKS
+
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void processInput(GLFWwindow* window);
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
@@ -40,6 +45,7 @@ double lastY = SCR_HEIGHT / 2.0f;
 bool firstMouse = true;
 
 // ----- TIMING (to have the same camera speed regardless of the computer the code is run on)
+
 float deltaTime = 0.0f;
 float lastFrame = 0.0f;
 
@@ -151,12 +157,13 @@ int main()
 
     // ----- VAO AND VBO for cube container object 
 
-    // Setup vertex buffer and configure vertex attributes 
+    // Define IDs for vertex buffer object and vertex array object
     unsigned int VBO, cubeVAO;
     glGenVertexArrays(1, &cubeVAO);
     glGenBuffers(1, &VBO);
 
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    // STATIC_DRAW: the data store contents will be modified once and used many times
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
     // Bind Vertex Array Object 1st. Any VBO, EBO or calls to glVertexAttribPointer and glEnableVertexAttribArray 
@@ -210,7 +217,7 @@ int main()
         // ----- TRANSFORMS
 
         // PROJECTION and VIEW matrices
-        glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
+        glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, NEAR_PLANE, FAR_PLANE);
         glm::mat4 view = camera.GetViewMatrix();
         lightingShader.setMat4("projection", projection);
         lightingShader.setMat4("view", view);
