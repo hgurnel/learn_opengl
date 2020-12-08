@@ -107,8 +107,10 @@ int main()
 
     // ----- VERTEX DATA
 
-    // Vertices representing a cube with normal vectors for each face
-    // To render a cube, we need a total of 36 vertices (6 faces * 2 triangles * 3 vertices each)
+    // Vertices representing a cube, with position and normal vector attributes
+    // Col 0 -> 2 = vertex position
+    // Col 3 -> 5 = normal vector for the cube face the vertex belongs to
+    // To render a cube, we need 36 vertices (6 faces * 2 triangles * 3 vertices each)
     float vertices[] = {
     -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
      0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
@@ -180,7 +182,7 @@ int main()
     glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
     
     // 6/ Enable attribute(s)
-    // Enable position and normal attributes, whose indices are 0 and 1 respectively
+    // Enable position and normal attributes
     glEnableVertexAttribArray(0);
     glEnableVertexAttribArray(1);
 
@@ -193,7 +195,7 @@ int main()
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
     // Set the vertex attributes
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
-    // Enable position attribute
+    // Enable position attribute (no need to use the normal attribute for the light cube)
     glEnableVertexAttribArray(0);
 
     // ----- RENDER LOOP
@@ -216,12 +218,13 @@ int main()
         glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        // ----- SHADER PROGRAM
+        // ----- SHADER PROGRAM COLORED CUBE
 
         lightingShader.use();
         lightingShader.setVec3("lightPos", lightPos);
         lightingShader.setVec3("objectColor", 1.0f, 0.5f, 0.31f);
         lightingShader.setVec3("lightColor", 1.0f, 1.0f, 1.0f);
+        lightingShader.setVec3("viewPos", camera.Position);
 
         // ----- TRANSFORMS
 
@@ -235,7 +238,7 @@ int main()
         glm::mat4 model = glm::mat4(1.0f);
         lightingShader.setMat4("model", model);
 
-        // ----- DRAW CUBE
+        // ----- DRAW COLORED CUBE
 
         glBindVertexArray(cubeVAO);
         glDrawArrays(GL_TRIANGLES, 0, 36);
