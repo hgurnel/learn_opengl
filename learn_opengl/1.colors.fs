@@ -23,14 +23,15 @@ void main()
     // Computation of the light's direction vector, ie the direction vector between
     // the light source and the fragment's position
     vec3 lightDir = normalize(lightPos - FragPos);
-    vec3 norm = normalize(Normal); 
+    
+    vec3 normalVec = normalize(Normal); 
 
     // Diffuse impact of the light on the current fragment
     // If the angle between both vectors is greater than 
     // 90 degrees then the result of the dot product will 
-    // actually become negative and we end up with a negative 
-    // diffuse component. For that reason we use the max function.
-    float diff = max(dot(norm, lightDir), 0.0);
+    // actually become negative and we'll end up with a negative 
+    // diffuse component. To avoid this, we use the max function.
+    float diff = max(dot(normalVec, lightDir), 0.0);
     vec3 diffuse = diff * lightColor;
 
     // ----- RESULT 
