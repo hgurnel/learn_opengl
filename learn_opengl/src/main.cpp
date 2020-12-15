@@ -222,7 +222,8 @@ int main()
         // (can be done anywhere in the render loop actually, 
         // but try to do it at least before using the light source positions)
         lightPos.x = sin(glfwGetTime()) * 2.0f;
-        lightPos.y = sin(glfwGetTime() / 2.0f);
+        lightPos.y = 0.0f;
+        lightPos.z = cos(glfwGetTime()) * 2.0f;
 
         // ----- SHADER PROGRAM COLORED CUBE
 
