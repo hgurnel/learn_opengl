@@ -218,6 +218,8 @@ int main()
         glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+        // ----- LIGHT POSITION
+
         // Change light position over time 
         // (can be done anywhere in the render loop actually, 
         // but try to do it at least before using the light source positions)
@@ -229,9 +231,9 @@ int main()
 
         lightingShader.use();
         lightingShader.setVec3("lightPos", lightPos);
+        lightingShader.setVec3("viewPos", camera.Position);
         lightingShader.setVec3("objectColor", 1.0f, 0.5f, 0.31f);
         lightingShader.setVec3("lightColor", 1.0f, 1.0f, 1.0f);
-        lightingShader.setVec3("viewPos", camera.Position);
 
         // ----- TRANSFORMS
 

@@ -1,29 +1,27 @@
 #version 330 core
 
+// In view coords for the exercice
 in vec3 Normal;
-// This input variable will be interpolated from the 3 world-position vectors of 
-// the triangle to form the FragPos vector that is the per-fragment world position.
 in vec3 FragPos;
+in vec3 LightPos;
 
 out vec4 FragColor;
   
 uniform vec3 objectColor;
 uniform vec3 lightColor;
-uniform vec3 lightPos;
-uniform vec3 viewPos;
 
 void main()
 {
     // ----- AMBIENT 
 
-    float ambientStrength = 0.5;
+    float ambientStrength = 0.1;
     vec3 ambient = ambientStrength * lightColor;
 
     // ----- DIFFUSE 
 
     // Computation of the light's direction vector, ie the direction vector between
     // the light source and the fragment's position
-    vec3 lightDir = normalize(lightPos - FragPos);
+    vec3 lightDir = normalize(LightPos - FragPos);
     
     vec3 normalVec = normalize(Normal); 
 
@@ -41,7 +39,8 @@ void main()
     // a medium-bright color so that it doesn't have too much of an impact
     float specularStrength = 3;
 
-    vec3 viewDir = normalize(viewPos - FragPos);
+    // The viewer is always at (0,0,0) in view-space, so viewDir is ((0,0,0) - FragPos) => (-FragPos)
+    vec3 viewDir = normalize(-FragPos);
     vec3 reflectDir = reflect(-lightDir, normalVec);
 
     // This 32 value is the shininess value of the highlight. 
