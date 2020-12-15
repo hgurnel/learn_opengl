@@ -16,7 +16,7 @@ void main()
 {
     // ----- AMBIENT 
 
-    float ambientStrength = 0.1;
+    float ambientStrength = 0.5;
     vec3 ambient = ambientStrength * lightColor;
 
     // ----- DIFFUSE 
@@ -39,7 +39,7 @@ void main()
 
     // Specular intensity value to give the specular highlight
     // a medium-bright color so that it doesn't have too much of an impact
-    float specularStrength = 0.5;
+    float specularStrength = 3;
 
     vec3 viewDir = normalize(viewPos - FragPos);
     vec3 reflectDir = reflect(-lightDir, normalVec);
@@ -47,7 +47,8 @@ void main()
     // This 32 value is the shininess value of the highlight. 
     // The higher the shininess value of an object, the more it properly reflects the light
     // instead of scattering it all around and thus the smaller the highlight becomes.
-    float spec = pow(max(dot(viewDir, reflectDir), 0.0), 32);
+    int shininess = 32;
+    float spec = pow(max(dot(viewDir, reflectDir), 0.0), shininess);
     vec3 specular = specularStrength * spec * lightColor;
 
     // ----- RESULT 
