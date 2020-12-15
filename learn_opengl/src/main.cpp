@@ -52,6 +52,9 @@ float lastFrame = 0.0f;
 
 glm::vec3 lightPos(1.2f, 1.0f, 2.0f);
 
+// Translation with oscillation
+float alpha = 0.0f;
+
 
 int main()
 {
@@ -248,9 +251,16 @@ int main()
         lightCubeShader.use();
         lightCubeShader.setMat4("projection", projection);
         lightCubeShader.setMat4("view", view);
+
+        // Translation of the light cube, to make it oscillate
+        alpha += 0.001f;
+        glm::vec3 translationVec(sin(alpha) / 2.0f, 0.0f, 0.0f);
+        lightCubeShader.setVec3("translationVec", translationVec);
+
         // Translate the light source cube to the light source's position and scale it down before rendering it
         model = glm::mat4(1.0f);
         model = glm::translate(model, lightPos);
+
         // A smaller cube
         model = glm::scale(model, glm::vec3(1.0f)); 
         lightCubeShader.setMat4("model", model);
