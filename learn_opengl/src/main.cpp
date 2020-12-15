@@ -218,6 +218,12 @@ int main()
         glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+        // Change light position over time 
+        // (can be done anywhere in the render loop actually, 
+        // but try to do it at least before using the light source positions)
+        lightPos.x = sin(glfwGetTime()) * 2.0f;
+        lightPos.y = sin(glfwGetTime() / 2.0f);
+
         // ----- SHADER PROGRAM COLORED CUBE
 
         lightingShader.use();
@@ -248,9 +254,11 @@ int main()
         lightCubeShader.use();
         lightCubeShader.setMat4("projection", projection);
         lightCubeShader.setMat4("view", view);
+
         // Translate the light source cube to the light source's position and scale it down before rendering it
         model = glm::mat4(1.0f);
         model = glm::translate(model, lightPos);
+
         // A smaller cube
         model = glm::scale(model, glm::vec3(1.0f)); 
         lightCubeShader.setMat4("model", model);
