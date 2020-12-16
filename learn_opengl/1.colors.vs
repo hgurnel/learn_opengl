@@ -5,10 +5,17 @@ layout (location = 1) in vec3 aNormal;
 
 out vec3 Normal;
 out vec3 FragPos;
+// Gouraud Shading
+out vec4 FragCol;
 
 uniform mat4 model;
 uniform mat4 view;
 uniform mat4 projection;
+// Gouraud Shading  
+uniform vec3 lightPos;
+uniform vec3 viewPos;
+uniform vec3 objectColor;
+uniform vec3 lightColor;
 
 void main()
 {
@@ -28,4 +35,48 @@ void main()
 	
 	// Fragment position expressed in world coordinates
 	FragPos = vec3(model * vec4(aPos, 1.0));
+
+	// ----- GOURAUD SHADING
+
+	// AMBIENT 
+
+    float ambientStrength = 0.1;
+    vec3 ambient = ambientStrength * lightColor;
+
+    // DIFFUSE 
+
+    // Computation of the light's direction vector, ie the direction vector between
+    // the light source and the fragment's position
+    vec3 lightDir = normalize(lightPos - FragPos);
+    
+    vec3 normalVec = normalize(Normal); 
+
+    // Diffuse impact of the light on the current fragment
+    // If the angle between both vectors is greater than 
+    // 90 degrees then the result of the dot product will 
+    // actually become negative and we'll end up with a negative 
+    // diffuse component. To avoid this, we use the max function.
+    float diff = max(dot(normalVec, lightDir), 0.0);
+    vec3 diffuse = diff * lightColor;
+
+    // SPECULAR
+
+    // Specular intensity value to give the specular highlight
+    // a medium-bright color so that it doesn't have too much of an impact
+    float specularStrength = 3;
+
+    vec3 viewDir = normalize(viewPos - FragPos);
+    vec3 reflectDir = reflect(-lightDir, normalVec);
+
+    // This 32 value is the shininess value of the highlight. 
+    // The higher the shininess value of an object, the more it properly reflects the light
+    // instead of scattering it all around and thus the smaller the highlight becomes.
+    int shininess = 32;
+    float spec = pow(max(dot(viewDir, reflectDir), 0.0), shininess);
+    vec3 specular = specularStrength * spec * lightColor;
+
+    // RESULT 
+
+    vec3 result = (ambient + diffuse + specular) * objectColor;
+    FragCol = vec4(result, 1.0);
 }
