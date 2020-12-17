@@ -218,15 +218,6 @@ int main()
         glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        // ----- LIGHT POSITION
-
-        // Change light position over time 
-        // (can be done anywhere in the render loop actually, 
-        // but try to do it at least before using the light source positions)
-        /*lightPos.x = 1.0 + sin(glfwGetTime()) * 2.0f;
-        lightPos.y = sin(glfwGetTime() / 2.0f);
-        lightPos.z = 2.0f;*/
-
         // ----- SHADER PROGRAM COLORED CUBE
 
         lightingShader.use();
