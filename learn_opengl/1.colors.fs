@@ -5,23 +5,37 @@ in vec3 FragPos;
 
 out vec4 FragColor;
 
-uniform vec3 lightPos;
+struct Material 
+{
+    vec3 ambient;
+    vec3 diffuse;
+    vec3 specular;
+    float shininess;
+}; 
+
+struct Light 
+{
+    vec3 position;  
+    vec3 ambient;
+    vec3 diffuse;
+    vec3 specular;
+};
+
 uniform vec3 viewPos;
-uniform vec3 objectColor;
-uniform vec3 lightColor;
+uniform Material material;
+uniform Light light;
 
 void main()
 {
     // AMBIENT 
 
-    float ambientStrength = 0.1;
-    vec3 ambient = ambientStrength * lightColor;
+    vec3 ambient = material.ambient * light.ambient;
 
     // DIFFUSE 
 
     // Computation of the light's direction vector, ie the direction vector between
     // the light source and the fragment's position
-    vec3 lightDir = normalize(lightPos - FragPos);
+    vec3 lightDir = normalize(light.position - FragPos);
     
     vec3 normalVec = normalize(Normal); 
 
@@ -31,13 +45,9 @@ void main()
     // actually become negative and we'll end up with a negative 
     // diffuse component. To avoid this, we use the max function.
     float diff = max(dot(normalVec, lightDir), 0.0);
-    vec3 diffuse = diff * lightColor;
+    vec3 diffuse = (material.diffuse * diff) * light.diffuse;
 
     // SPECULAR
-
-    // Specular intensity value to give the specular highlight
-    // a medium-bright color so that it doesn't have too much of an impact
-    float specularStrength = 3;
 
     vec3 viewDir = normalize(viewPos - FragPos);
     vec3 reflectDir = reflect(-lightDir, normalVec);
@@ -46,11 +56,11 @@ void main()
     // The higher the shininess value of an object, the more it properly reflects the light
     // instead of scattering it all around and thus the smaller the highlight becomes.
     int shininess = 32;
-    float spec = pow(max(dot(viewDir, reflectDir), 0.0), shininess);
-    vec3 specular = specularStrength * spec * lightColor;
+    float spec = pow(max(dot(viewDir, reflectDir), 0.0), material.shininess);
+    vec3 specular = (material.specular * spec) * light.specular;
 
     // RESULT 
 
-    vec3 result = (ambient + diffuse + specular) * objectColor;
+    vec3 result = ambient + diffuse + specular;
     FragColor = vec4(result, 1.0);
 }

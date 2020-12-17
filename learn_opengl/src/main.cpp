@@ -223,17 +223,36 @@ int main()
         // Change light position over time 
         // (can be done anywhere in the render loop actually, 
         // but try to do it at least before using the light source positions)
-        lightPos.x = 1.0 + sin(glfwGetTime()) * 2.0f;
+        /*lightPos.x = 1.0 + sin(glfwGetTime()) * 2.0f;
         lightPos.y = sin(glfwGetTime() / 2.0f);
-        lightPos.z = 2.0f;
+        lightPos.z = 2.0f;*/
 
         // ----- SHADER PROGRAM COLORED CUBE
 
         lightingShader.use();
-        lightingShader.setVec3("lightPos", lightPos);
+
+        lightingShader.setVec3("light.position", lightPos);
         lightingShader.setVec3("viewPos", camera.Position);
-        lightingShader.setVec3("objectColor", 1.0f, 0.5f, 0.31f);
-        lightingShader.setVec3("lightColor", 1.0f, 1.0f, 1.0f);
+
+        // LIGHT properties
+        // Make light color change over time
+        glm::vec3 lightColor;
+        lightColor.x = sin(glfwGetTime() * 2.0f);
+        lightColor.y = sin(glfwGetTime() * 0.7f);
+        lightColor.z = sin(glfwGetTime() * 1.3f);
+
+        glm::vec3 diffuseColor = lightColor * glm::vec3(0.5f);  // Decrease the influence
+        glm::vec3 ambientColor = diffuseColor * glm::vec3(0.2f);// Low influence
+
+        lightingShader.setVec3("light.ambient", ambientColor);
+        lightingShader.setVec3("light.diffuse", diffuseColor);  // Darken diffuse light a bit
+        lightingShader.setVec3("light.specular", 1.0f, 1.0f, 1.0f);
+
+        // MATERIAL properties
+        lightingShader.setVec3("material.ambient", 1.0f, 0.5f, 0.31f);
+        lightingShader.setVec3("material.diffuse", 1.0f, 0.5f, 0.31f);
+        lightingShader.setVec3("material.specular", 0.5f, 0.5f, 0.5f);
+        lightingShader.setFloat("material.shininess", 32.0f);
 
         // ----- TRANSFORMS
 
