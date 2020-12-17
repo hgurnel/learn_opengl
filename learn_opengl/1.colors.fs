@@ -1,15 +1,15 @@
 #version 330 core
 
-in vec3 Normal;
 in vec3 FragPos;
+in vec3 Normal;
+in vec2 TexCoords;
 
 out vec4 FragColor;
 
 struct Material 
 {
-    vec3 ambient;
-    vec3 diffuse;
-    vec3 specular;
+    sampler2D diffuse;
+    sampler2D specular;
     float shininess;
 }; 
 
@@ -27,9 +27,13 @@ uniform Light light;
 
 void main()
 {
-    // AMBIENT 
+    // AMBIENT
 
-    vec3 ambient = material.ambient * light.ambient;
+    // texture() accesses the texture at a given position and returns the color in normalised RGBA 
+    // (this is important, the output color in GLSL ranges from 0 to 1, not 0 to 255)
+    // - sampler2D means that the texture is in texel space -> it ranges from 0 to its size.
+    // - texcoord is the variation of that fragment.
+    vec3 ambient = light.ambient * texture(material.diffuse, TexCoords).rgb;
 
     // DIFFUSE 
 
@@ -45,7 +49,7 @@ void main()
     // actually become negative and we'll end up with a negative 
     // diffuse component. To avoid this, we use the max function.
     float diff = max(dot(normalVec, lightDir), 0.0);
-    vec3 diffuse = (material.diffuse * diff) * light.diffuse;
+    vec3 diffuse = light.diffuse * diff * texture(material.diffuse, TexCoords).rgb;
 
     // SPECULAR
 
@@ -55,9 +59,8 @@ void main()
     // This 32 value is the shininess value of the highlight. 
     // The higher the shininess value of an object, the more it properly reflects the light
     // instead of scattering it all around and thus the smaller the highlight becomes.
-    int shininess = 32;
     float spec = pow(max(dot(viewDir, reflectDir), 0.0), material.shininess);
-    vec3 specular = (material.specular * spec) * light.specular;
+    vec3 specular = light.specular * spec * texture(material.specular, TexCoords).rgb;
 
     // RESULT 
 
