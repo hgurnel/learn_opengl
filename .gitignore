@@ -92,3 +92,5 @@ learn_opengl/learn_opengl.vcxproj.user
 learn_opengl/learn_opengl.vcxproj.filters
 
 learn_opengl/learn_opengl.vcxproj
+
+*.png

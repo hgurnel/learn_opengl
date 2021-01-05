@@ -1,15 +1,17 @@
 #version 330 core
 
-in vec3 Normal;
 in vec3 FragPos;
+in vec3 Normal;
+in vec2 TexCoords;
 
 out vec4 FragColor;
 
+// NB: a texture is bound to a sampler
 struct Material 
 {
-    vec3 ambient;
-    vec3 diffuse;
-    vec3 specular;
+    sampler2D diffuse;
+    sampler2D specular;
+    sampler2D emission;
     float shininess;
 }; 
 
@@ -27,9 +29,13 @@ uniform Light light;
 
 void main()
 {
-    // AMBIENT 
+    // AMBIENT
 
-    vec3 ambient = material.ambient * light.ambient;
+    // texture() accesses the texture at a given position and returns the color in normalised RGBA 
+    // (this is important, the output color in GLSL ranges from 0 to 1, not 0 to 255)
+    // - sampler2D means that the texture is in texel space -> it ranges from 0 to its size.
+    // - texcoord is the variation of that fragment. It corresponds to the coords at which the texture will be sampled
+    vec3 ambient = light.ambient * vec3(texture(material.diffuse, TexCoords));
 
     // DIFFUSE 
 
@@ -45,7 +51,7 @@ void main()
     // actually become negative and we'll end up with a negative 
     // diffuse component. To avoid this, we use the max function.
     float diff = max(dot(normalVec, lightDir), 0.0);
-    vec3 diffuse = (material.diffuse * diff) * light.diffuse;
+    vec3 diffuse = light.diffuse * diff * vec3(texture(material.diffuse, TexCoords));
 
     // SPECULAR
 
@@ -55,12 +61,21 @@ void main()
     // This 32 value is the shininess value of the highlight. 
     // The higher the shininess value of an object, the more it properly reflects the light
     // instead of scattering it all around and thus the smaller the highlight becomes.
-    int shininess = 32;
     float spec = pow(max(dot(viewDir, reflectDir), 0.0), material.shininess);
-    vec3 specular = (material.specular * spec) * light.specular;
+    // light.specular (vec3), spec (float), texture(sampler, texCoords) (vec3)
+    vec3 specular = light.specular * spec * vec3(texture(material.specular, TexCoords));
+
+    // EMISSIVE
+
+    vec3 emission = vec3(0.0);
+    if (texture(material.specular, TexCoords).r == 0.0)   //rough check for blackbox inside spec texture
+    {
+        //apply emission texture
+        emission = vec3(texture(material.emission, TexCoords));
+    }
 
     // RESULT 
 
-    vec3 result = ambient + diffuse + specular;
+    vec3 result = ambient + diffuse + specular + emission;
     FragColor = vec4(result, 1.0);
 }
