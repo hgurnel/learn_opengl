@@ -249,8 +249,8 @@ int main()
         lightingShader.setVec3("viewPos", camera.Position);
 
         // LIGHT properties
-        lightingShader.setVec3("light.ambient", 0.2f, 0.2f, 0.2f);
-        lightingShader.setVec3("light.diffuse", 0.5f, 0.5f, 0.5f);
+        lightingShader.setVec3("light.ambient", 0.5f, 0.5f, 0.5f);
+        lightingShader.setVec3("light.diffuse", 0.8f, 0.8f, 0.8f);
         lightingShader.setVec3("light.specular", 1.0f, 1.0f, 1.0f);
 
         // MATERIAL properties
