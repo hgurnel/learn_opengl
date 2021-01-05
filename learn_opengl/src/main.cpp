@@ -217,6 +217,7 @@ int main()
     // ----- SHADER PROGRAM
 
     lightingShader.use();
+    // 0 and 1 are the texture units assigned to material.diffuse and material.specular
     lightingShader.setInt("material.diffuse", 0);
     lightingShader.setInt("material.specular", 1);
 
@@ -269,10 +270,10 @@ int main()
 
         // ----- BIND LIGHTING MAPS
 
-        // Bind diffuse map
+        // Bind diffuse map to texture unit 0
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, diffuseMap);
-        // Bind specular map
+        // Bind specular map to texture unit 1
         glActiveTexture(GL_TEXTURE1);
         glBindTexture(GL_TEXTURE_2D, specularMap);
 
