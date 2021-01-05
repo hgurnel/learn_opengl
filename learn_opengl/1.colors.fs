@@ -67,7 +67,12 @@ void main()
 
     // EMISSIVE
 
-    vec3 emissive = vec3(texture(material.emissive, TexCoords));
+    vec3 emissive = vec3(0.0);
+    if (texture(material.specular, TexCoords).r == 0.0)   //rough check for blackbox inside spec texture
+    {
+        //apply emissive texture
+        emissive = vec3(texture(material.emissive, TexCoords));
+    }
 
     // RESULT 
 
