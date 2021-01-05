@@ -25,8 +25,8 @@ const char* PATH_COLOR_VS = "1.colors.vs";
 const char* PATH_COLOR_FS = "1.colors.fs";
 const char* PATH_LIGHT_CUBE_VS = "1.light_cube.vs";
 const char* PATH_LIGHT_CUBE_FS = "1.light_cube.fs";
-const char* PATH_TEXTURE_DIFFUSE = "../textures/container2.png";
-const char* PATH_TEXTURE_SPECULAR = "../textures/container2_specular.png";
+const char* PATH_TEXTURE_DIFFUSE = "../textures/container2_diffuse_map.png";
+const char* PATH_TEXTURE_SPECULAR = "../textures/container2_specular_map_colored.png";
 
 // ----- CALLBACKS & FUNCTIONS
 

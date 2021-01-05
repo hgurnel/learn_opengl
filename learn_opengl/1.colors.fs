@@ -62,7 +62,7 @@ void main()
     // instead of scattering it all around and thus the smaller the highlight becomes.
     float spec = pow(max(dot(viewDir, reflectDir), 0.0), material.shininess);
     // light.specular (vec3), spec (float), texture(sampler, texCoords) (vec3)
-    vec3 specular = light.specular * spec * (vec3(1.0) - vec3(texture(material.specular, TexCoords)));
+    vec3 specular = light.specular * spec * vec3(texture(material.specular, TexCoords));
 
     // RESULT 
 
