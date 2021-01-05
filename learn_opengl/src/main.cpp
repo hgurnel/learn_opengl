@@ -219,10 +219,10 @@ int main()
     // ----- SHADER PROGRAM
 
     lightingShader.use();
-    // 0, 1 and 2 are the texture units assigned to material.diffuse, material.specular and material.emissive
+    // 0, 1 and 2 are the texture units assigned to material.diffuse, material.specular and material.emission
     lightingShader.setInt("material.diffuse", 0);
     lightingShader.setInt("material.specular", 1);
-    lightingShader.setInt("material.emissive", 2);
+    lightingShader.setInt("material.emission", 2);
 
     // ----- RENDER LOOP
 
@@ -279,7 +279,7 @@ int main()
         // Bind specular map to texture unit 1
         glActiveTexture(GL_TEXTURE1);
         glBindTexture(GL_TEXTURE_2D, specularMap);
-        // Bind emissive map to texture unit 2
+        // Bind emission map to texture unit 2
         glActiveTexture(GL_TEXTURE2);
         glBindTexture(GL_TEXTURE_2D, emissiveMap);
 

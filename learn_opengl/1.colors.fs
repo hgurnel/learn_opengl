@@ -11,7 +11,7 @@ struct Material
 {
     sampler2D diffuse;
     sampler2D specular;
-    sampler2D emissive;
+    sampler2D emission;
     float shininess;
 }; 
 
@@ -67,15 +67,15 @@ void main()
 
     // EMISSIVE
 
-    vec3 emissive = vec3(0.0);
+    vec3 emission = vec3(0.0);
     if (texture(material.specular, TexCoords).r == 0.0)   //rough check for blackbox inside spec texture
     {
-        //apply emissive texture
-        emissive = vec3(texture(material.emissive, TexCoords));
+        //apply emission texture
+        emission = vec3(texture(material.emission, TexCoords));
     }
 
     // RESULT 
 
-    vec3 result = ambient + diffuse + specular + emissive;
+    vec3 result = ambient + diffuse + specular + emission;
     FragColor = vec4(result, 1.0);
 }
