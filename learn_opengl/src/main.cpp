@@ -26,7 +26,8 @@ const char* PATH_COLOR_FS = "1.colors.fs";
 const char* PATH_LIGHT_CUBE_VS = "1.light_cube.vs";
 const char* PATH_LIGHT_CUBE_FS = "1.light_cube.fs";
 const char* PATH_TEXTURE_DIFFUSE = "../textures/container2_diffuse_map.png";
-const char* PATH_TEXTURE_SPECULAR = "../textures/container2_specular_map_colored.png";
+const char* PATH_TEXTURE_SPECULAR = "../textures/container2_specular_map.png";
+const char* PATH_TEXTURE_EMISSIVE = "../textures/container2_emissive_map.jpg";
 
 // ----- CALLBACKS & FUNCTIONS
 
@@ -213,13 +214,15 @@ int main()
 
     unsigned int diffuseMap = loadTexture(PATH_TEXTURE_DIFFUSE);
     unsigned int specularMap = loadTexture(PATH_TEXTURE_SPECULAR);
+    unsigned int emissiveMap = loadTexture(PATH_TEXTURE_EMISSIVE);
 
     // ----- SHADER PROGRAM
 
     lightingShader.use();
-    // 0 and 1 are the texture units assigned to material.diffuse and material.specular
+    // 0, 1 and 2 are the texture units assigned to material.diffuse, material.specular and material.emission
     lightingShader.setInt("material.diffuse", 0);
     lightingShader.setInt("material.specular", 1);
+    lightingShader.setInt("material.emission", 2);
 
     // ----- RENDER LOOP
 
@@ -276,6 +279,9 @@ int main()
         // Bind specular map to texture unit 1
         glActiveTexture(GL_TEXTURE1);
         glBindTexture(GL_TEXTURE_2D, specularMap);
+        // Bind emission map to texture unit 2
+        glActiveTexture(GL_TEXTURE2);
+        glBindTexture(GL_TEXTURE_2D, emissiveMap);
 
         // ----- RENDER COLORED CUBE
 
