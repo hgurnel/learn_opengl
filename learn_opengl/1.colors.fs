@@ -6,6 +6,7 @@ in vec2 TexCoords;
 
 out vec4 FragColor;
 
+// NB: a texture is bound to a sampler
 struct Material 
 {
     sampler2D diffuse;
@@ -32,8 +33,8 @@ void main()
     // texture() accesses the texture at a given position and returns the color in normalised RGBA 
     // (this is important, the output color in GLSL ranges from 0 to 1, not 0 to 255)
     // - sampler2D means that the texture is in texel space -> it ranges from 0 to its size.
-    // - texcoord is the variation of that fragment.
-    vec3 ambient = light.ambient * texture(material.diffuse, TexCoords).rgb;
+    // - texcoord is the variation of that fragment. It corresponds to the coords at which the texture will be sampled
+    vec3 ambient = light.ambient * vec3(texture(material.diffuse, TexCoords));
 
     // DIFFUSE 
 
@@ -49,7 +50,7 @@ void main()
     // actually become negative and we'll end up with a negative 
     // diffuse component. To avoid this, we use the max function.
     float diff = max(dot(normalVec, lightDir), 0.0);
-    vec3 diffuse = light.diffuse * diff * texture(material.diffuse, TexCoords).rgb;
+    vec3 diffuse = light.diffuse * diff * vec3(texture(material.diffuse, TexCoords));
 
     // SPECULAR
 
@@ -60,7 +61,8 @@ void main()
     // The higher the shininess value of an object, the more it properly reflects the light
     // instead of scattering it all around and thus the smaller the highlight becomes.
     float spec = pow(max(dot(viewDir, reflectDir), 0.0), material.shininess);
-    vec3 specular = light.specular * spec * texture(material.specular, TexCoords).rgb;
+    // light.specular (vec3), spec (float), texture(sampler, texCoords) (vec3)
+    vec3 specular = light.specular * spec * (vec3(1.0) - vec3(texture(material.specular, TexCoords)));
 
     // RESULT 
 
