@@ -268,6 +268,7 @@ int main()
         // We pass a cosine and not an angle because in the frag shader we compute a dot prod which returns a cos
         // It saves some performance to pass the cos instead of computing the inverse cosine in the shader
         lightingShader.setFloat("light.cutOff", glm::cos(glm::radians(12.5f)));
+        lightingShader.setFloat("light.outerCutOff", glm::cos(glm::radians(17.5f)));
         lightingShader.setVec3("viewPos", camera.Position);
 
         // LIGHT properties

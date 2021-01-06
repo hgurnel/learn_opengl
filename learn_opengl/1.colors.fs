@@ -25,6 +25,7 @@ struct Light
 
     // Flashlight
     float cutOff;
+    float outerCutOff;
 
     // Attenuation
     float constant;
@@ -45,60 +46,52 @@ void main()
     // lightDir = vector pointing from the fragment to the light source 
     // -light.direction = aiming direction of the flashlight 
     // (negated, because we want the vectors to point towards the light source, instead of from)
-    float theta = dot(lightDir, normalize(-light.direction));
-    
-    // Shouldn't theta be smaller than the light's cutoff value to be inside the spotlight? 
-    // That is right, but don't forget angle values are represented as cosine values and an 
-    // angle of 0 degrees is represented as the cosine value of 1.0 while an angle of 90 degrees 
-    // is represented as the cosine value of 0.0
-    if(theta > light.cutOff) 
-    {       
-        // AMBIENT
+    float theta     = dot(lightDir, normalize(-light.direction));
+    float epsilon   = light.cutOff - light.outerCutOff;
+    float intensity = clamp((theta - light.outerCutOff) / epsilon, 0.0, 1.0);
+       
+    // AMBIENT
         
-        // texture() accesses the texture at a given position and returns the color in normalised RGBA 
-        // (this is important, the output color in GLSL ranges from 0 to 1, not 0 to 255)
-        // - sampler2D means that the texture is in texel space -> it ranges from 0 to its size.
-        // - texcoord is the variation of that fragment. It corresponds to the coords at which the texture will be sampled
-        vec3 ambient = light.ambient * vec3(texture(material.diffuse, TexCoords));
+    // texture() accesses the texture at a given position and returns the color in normalised RGBA 
+    // (this is important, the output color in GLSL ranges from 0 to 1, not 0 to 255)
+    // - sampler2D means that the texture is in texel space -> it ranges from 0 to its size.
+    // - texcoord is the variation of that fragment. It corresponds to the coords at which the texture will be sampled
+    vec3 ambient = light.ambient * vec3(texture(material.diffuse, TexCoords));
         
-        // DIFFUSE 
+    // DIFFUSE 
         
-        vec3 normalVec = normalize(Normal); 
+    vec3 normalVec = normalize(Normal); 
         
-        // Diffuse impact of the light on the current fragment
-        // If the angle between both vectors is greater than 
-        // 90 degrees then the result of the dot product will 
-        // actually become negative and we'll end up with a negative 
-        // diffuse component. To avoid this, we use the max function.
-        float diff = max(dot(normalVec, lightDir), 0.0);
-        vec3 diffuse = light.diffuse * diff * vec3(texture(material.diffuse, TexCoords));
+    // Diffuse impact of the light on the current fragment
+    // If the angle between both vectors is greater than 
+    // 90 degrees then the result of the dot product will 
+    // actually become negative and we'll end up with a negative 
+    // diffuse component. To avoid this, we use the max function.
+    float diff = max(dot(normalVec, lightDir), 0.0);
+    vec3 diffuse = light.diffuse * diff * vec3(texture(material.diffuse, TexCoords));
         
-        // SPECULAR
+    // SPECULAR
         
-        vec3 viewDir = normalize(viewPos - FragPos);
-        vec3 reflectDir = reflect(-lightDir, normalVec);
+    vec3 viewDir = normalize(viewPos - FragPos);
+    vec3 reflectDir = reflect(-lightDir, normalVec);
         
-        // This 32 value is the shininess value of the highlight. 
-        // The higher the shininess value of an object, the more it properly reflects the light
-        // instead of scattering it all around and thus the smaller the highlight becomes.
-        float spec = pow(max(dot(viewDir, reflectDir), 0.0), material.shininess);
-        // light.specular (vec3), spec (float), texture(sampler, texCoords) (vec3)
-        vec3 specular = light.specular * spec * vec3(texture(material.specular, TexCoords));
+    // This 32 value is the shininess value of the highlight. 
+    // The higher the shininess value of an object, the more it properly reflects the light
+    // instead of scattering it all around and thus the smaller the highlight becomes.
+    float spec = pow(max(dot(viewDir, reflectDir), 0.0), material.shininess);
+    // light.specular (vec3), spec (float), texture(sampler, texCoords) (vec3)
+    vec3 specular = light.specular * spec * vec3(texture(material.specular, TexCoords));
 
-        // ATTENUATION
+    // ATTENUATION
 
-        float distance    = length(light.position - FragPos);
-        float attenuation = 1.0 / (light.constant + light.linear * distance + light.quadratic * (distance * distance));
+    float distance    = length(light.position - FragPos);
+    float attenuation = 1.0 / (light.constant + light.linear * distance + light.quadratic * (distance * distance));
 
-        diffuse   *= attenuation;
-        specular *= attenuation; 
+    diffuse  *= intensity;
+    specular *= intensity;
 
-        // RESULT 
+    // RESULT 
 
-        vec3 result = ambient + diffuse + specular;
-        FragColor = vec4(result, 1.0);
-    }
-
-    else  // else, use ambient light, so the scene isn't completely dark outside the spotlight.
-        FragColor = vec4(light.ambient * texture(material.diffuse, TexCoords).rgb, 1.0);
+    vec3 result = ambient + diffuse + specular;
+    FragColor = vec4(result, 1.0);
 }
