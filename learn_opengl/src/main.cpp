@@ -164,6 +164,22 @@ int main()
         -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f, 1.0f
     };
 
+    // ----- 10 CUBES
+
+    glm::vec3 cubePositions[] =
+    {
+        glm::vec3(0.0f,  0.0f,  0.0f),
+        glm::vec3(2.0f,  5.0f, -15.0f),
+        glm::vec3(-1.5f, -2.2f, -2.5f),
+        glm::vec3(-3.8f, -2.0f, -12.3f),
+        glm::vec3(2.4f, -0.4f, -3.5f),
+        glm::vec3(-1.7f,  3.0f, -7.5f),
+        glm::vec3(1.3f, -2.0f, -2.5f),
+        glm::vec3(1.5f,  2.0f, -2.5f),
+        glm::vec3(1.5f,  0.2f, -1.5f),
+        glm::vec3(-1.3f,  1.0f, -1.5f)
+    };
+
     // ----- VAO AND VBO for cube container object 
 
     // 1/ Unique IDs for VBO and VAO
@@ -219,10 +235,9 @@ int main()
     // ----- SHADER PROGRAM
 
     lightingShader.use();
-    // 0, 1 and 2 are the texture units assigned to material.diffuse, material.specular and material.emission
+    // 0, 1 and 2 are the texture units assigned to material.diffuse and material.specular
     lightingShader.setInt("material.diffuse", 0);
     lightingShader.setInt("material.specular", 1);
-    lightingShader.setInt("material.emission", 2);
 
     // ----- RENDER LOOP
 
@@ -244,17 +259,26 @@ int main()
         glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        // ----- SHADER PROGRAM COLORED CUBE
+        // ----- SHADER PROGRAM WOODEN CONTAINER
 
         lightingShader.use();
 
-        lightingShader.setVec3("light.position", lightPos);
+        lightingShader.setVec3("light.position", camera.Position);
+        lightingShader.setVec3("light.direction", camera.Front);
+        // We pass a cosine and not an angle because in the frag shader we compute a dot prod which returns a cos
+        // It saves some performance to pass the cos instead of computing the inverse cosine in the shader
+        lightingShader.setFloat("light.cutOff", glm::cos(glm::radians(12.5f)));
+        lightingShader.setFloat("light.outerCutOff", glm::cos(glm::radians(17.5f)));
         lightingShader.setVec3("viewPos", camera.Position);
 
         // LIGHT properties
         lightingShader.setVec3("light.ambient", 0.5f, 0.5f, 0.5f);
         lightingShader.setVec3("light.diffuse", 0.8f, 0.8f, 0.8f);
         lightingShader.setVec3("light.specular", 1.0f, 1.0f, 1.0f);
+
+        lightingShader.setFloat("light.constant", 1.0f);
+        lightingShader.setFloat("light.linear", 0.09f);
+        lightingShader.setFloat("light.quadratic", 0.032f);
 
         // MATERIAL properties
         lightingShader.setFloat("material.shininess", 64.0f);
@@ -267,10 +291,6 @@ int main()
         lightingShader.setMat4("projection", projection);
         lightingShader.setMat4("view", view);
 
-        // MODEL matrix (used in the draw call)
-        glm::mat4 model = glm::mat4(1.0f);
-        lightingShader.setMat4("model", model);
-
         // ----- BIND LIGHTING MAPS
 
         // Bind diffuse map to texture unit 0
@@ -279,31 +299,43 @@ int main()
         // Bind specular map to texture unit 1
         glActiveTexture(GL_TEXTURE1);
         glBindTexture(GL_TEXTURE_2D, specularMap);
-        // Bind emission map to texture unit 2
-        glActiveTexture(GL_TEXTURE2);
-        glBindTexture(GL_TEXTURE_2D, emissiveMap);
 
-        // ----- RENDER COLORED CUBE
+        // ----- RENDER WOODEN CONTAINER
+
+        // MODEL matrix (used in the draw call)
+        glm::mat4 model = glm::mat4(1.0f);
+        lightingShader.setMat4("model", model);
 
         glBindVertexArray(cubeVAO);
-        glDrawArrays(GL_TRIANGLES, 0, 36);
+
+        for (unsigned int i = 0; i < 10; i++)
+        {
+            glm::mat4 model = glm::mat4(1.0f);
+            model = glm::translate(model, cubePositions[i]);
+            float angle = 20.0f * i;
+            model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
+            lightingShader.setMat4("model", model);
+
+            glDrawArrays(GL_TRIANGLES, 0, 36);
+        }
 
         // ----- RENDER LIGHT CUBE
+        // weird when we only have a directional light, so we don't render the light object
 
-        lightCubeShader.use();
-        lightCubeShader.setMat4("projection", projection);
-        lightCubeShader.setMat4("view", view);
+        //lightCubeShader.use();
+        //lightCubeShader.setMat4("projection", projection);
+        //lightCubeShader.setMat4("view", view);
 
-        // Translate the light source cube to the light source's position and scale it down before rendering it
-        model = glm::mat4(1.0f);
-        model = glm::translate(model, lightPos);
+        //// Translate the light source cube to the light source's position and scale it down before rendering it
+        //model = glm::mat4(1.0f);
+        //model = glm::translate(model, lightPos);
 
-        // A smaller cube
-        model = glm::scale(model, glm::vec3(0.2f)); 
-        lightCubeShader.setMat4("model", model);
+        //// A smaller cube
+        //model = glm::scale(model, glm::vec3(0.2f)); 
+        //lightCubeShader.setMat4("model", model);
 
-        glBindVertexArray(lightCubeVAO);
-        glDrawArrays(GL_TRIANGLES, 0, 36);
+        //glBindVertexArray(lightCubeVAO);
+        //glDrawArrays(GL_TRIANGLES, 0, 36);
 
         // Swap front (img displayed on screen) and back (img being rendered) buffers to render img without flickering effect
         glfwSwapBuffers(window);
