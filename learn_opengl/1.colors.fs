@@ -15,9 +15,12 @@ struct Material
     float shininess;
 }; 
 
+// Directional light
 struct Light 
 {
-    vec3 position;  
+    // Position no longer necessary when using directional lights
+    //vec3 position; 
+    vec3 direction;
     vec3 ambient;
     vec3 diffuse;
     vec3 specular;
@@ -39,9 +42,15 @@ void main()
 
     // DIFFUSE 
 
-    // Computation of the light's direction vector, ie the direction vector between
-    // the light source and the fragment's position
-    vec3 lightDir = normalize(light.position - FragPos);
+    // DIRECTIONAL LIGHT: we directly use the light's direction vector 
+    // instead of calculating the lightDir vector using the light's position vector.
+    // We first negate the light.direction vector. The lighting calculations we used 
+    // so far expect the light direction to be a direction from the fragment towards 
+    // the light source, but people generally prefer to specify a directional light 
+    // as a global direction pointing from the light source. Therefore, we have to negate 
+    // the global light direction vector to switch its direction; it's now a direction 
+    // vector pointing towards the light source.
+    vec3 lightDir = normalize(-light.direction);
     
     vec3 normalVec = normalize(Normal); 
 
