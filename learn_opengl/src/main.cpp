@@ -108,7 +108,7 @@ int main()
     // ----- SHADER PROGRAMS (build and compile)
 
     // Files are written by default in the dir containing "srd" and "header"
-    Shader containerShader(PATH_COLOR_VS, PATH_COLOR_FS);
+    Shader lightingShader(PATH_COLOR_VS, PATH_COLOR_FS);
     Shader lightCubeShader(PATH_LIGHT_CUBE_VS, PATH_LIGHT_CUBE_FS);    
 
     // ----- VERTEX DATA
@@ -234,11 +234,10 @@ int main()
 
     // ----- SHADER PROGRAM
 
-    containerShader.use();
-    // 0, 1 and 2 are the texture units assigned to material.diffuse, material.specular and material.emission
-    containerShader.setInt("material.diffuse", 0);
-    containerShader.setInt("material.specular", 1);
-    containerShader.setInt("material.emission", 2);
+    lightingShader.use();
+    // 0, 1 and 2 are the texture units assigned to material.diffuse and material.specular
+    lightingShader.setInt("material.diffuse", 0);
+    lightingShader.setInt("material.specular", 1);
 
     // ----- RENDER LOOP
 
@@ -262,27 +261,30 @@ int main()
 
         // ----- SHADER PROGRAM WOODEN CONTAINER
 
-        containerShader.use();
+        lightingShader.use();
 
-        //containerShader.setVec3("light.position", lightPos);
-        containerShader.setVec3("light.direction", -0.2f, -1.0f, -0.3f);
-        containerShader.setVec3("viewPos", camera.Position);
+        lightingShader.setVec3("light.position", lightPos);
+        lightingShader.setVec3("viewPos", camera.Position);
 
         // LIGHT properties
-        containerShader.setVec3("light.ambient", 0.5f, 0.5f, 0.5f);
-        containerShader.setVec3("light.diffuse", 0.8f, 0.8f, 0.8f);
-        containerShader.setVec3("light.specular", 1.0f, 1.0f, 1.0f);
+        lightingShader.setVec3("light.ambient", 0.5f, 0.5f, 0.5f);
+        lightingShader.setVec3("light.diffuse", 0.8f, 0.8f, 0.8f);
+        lightingShader.setVec3("light.specular", 1.0f, 1.0f, 1.0f);
+
+        lightingShader.setFloat("light.constant", 1.0f);
+        lightingShader.setFloat("light.linear", 0.09f);
+        lightingShader.setFloat("light.quadratic", 0.032f);
 
         // MATERIAL properties
-        containerShader.setFloat("material.shininess", 64.0f);
+        lightingShader.setFloat("material.shininess", 64.0f);
 
         // ----- TRANSFORMS
 
         // PROJECTION and VIEW matrices
         glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, NEAR_PLANE, FAR_PLANE);
         glm::mat4 view = camera.GetViewMatrix();
-        containerShader.setMat4("projection", projection);
-        containerShader.setMat4("view", view);
+        lightingShader.setMat4("projection", projection);
+        lightingShader.setMat4("view", view);
 
         // ----- BIND LIGHTING MAPS
 
@@ -292,15 +294,12 @@ int main()
         // Bind specular map to texture unit 1
         glActiveTexture(GL_TEXTURE1);
         glBindTexture(GL_TEXTURE_2D, specularMap);
-        // Bind emission map to texture unit 2
-        glActiveTexture(GL_TEXTURE2);
-        glBindTexture(GL_TEXTURE_2D, emissiveMap);
 
         // ----- RENDER WOODEN CONTAINER
 
         // MODEL matrix (used in the draw call)
         glm::mat4 model = glm::mat4(1.0f);
-        containerShader.setMat4("model", model);
+        lightingShader.setMat4("model", model);
 
         glBindVertexArray(cubeVAO);
 
@@ -310,7 +309,7 @@ int main()
             model = glm::translate(model, cubePositions[i]);
             float angle = 20.0f * i;
             model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
-            containerShader.setMat4("model", model);
+            lightingShader.setMat4("model", model);
 
             glDrawArrays(GL_TRIANGLES, 0, 36);
         }

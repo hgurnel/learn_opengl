@@ -11,19 +11,21 @@ struct Material
 {
     sampler2D diffuse;
     sampler2D specular;
-    sampler2D emission;
     float shininess;
 }; 
 
-// Directional light
+// Point light
 struct Light 
 {
-    // Position no longer necessary when using directional lights
-    //vec3 position; 
-    vec3 direction;
+    vec3 position;
     vec3 ambient;
     vec3 diffuse;
     vec3 specular;
+
+    // Attenuation constants
+    float constant;
+    float linear;
+    float quadratic;
 };
 
 uniform vec3 viewPos;
@@ -42,15 +44,8 @@ void main()
 
     // DIFFUSE 
 
-    // DIRECTIONAL LIGHT: we directly use the light's direction vector 
-    // instead of calculating the lightDir vector using the light's position vector.
-    // We first negate the light.direction vector. The lighting calculations we used 
-    // so far expect the light direction to be a direction from the fragment towards 
-    // the light source, but people generally prefer to specify a directional light 
-    // as a global direction pointing from the light source. Therefore, we have to negate 
-    // the global light direction vector to switch its direction; it's now a direction 
-    // vector pointing towards the light source.
-    vec3 lightDir = normalize(-light.direction);
+    // POINT LIGHT: we compute the light direction as usual, not like with a directional light
+    vec3 lightDir = normalize(light.position - FragPos);
     
     vec3 normalVec = normalize(Normal); 
 
@@ -74,17 +69,17 @@ void main()
     // light.specular (vec3), spec (float), texture(sampler, texCoords) (vec3)
     vec3 specular = light.specular * spec * vec3(texture(material.specular, TexCoords));
 
-    // EMISSIVE
+    // ATTENUATION (for point light)
 
-    vec3 emission = vec3(0.0);
-    if (texture(material.specular, TexCoords).r == 0.0)   //rough check for blackbox inside spec texture
-    {
-        //apply emission texture
-        emission = vec3(texture(material.emission, TexCoords));
-    }
+    float distance    = length(light.position - FragPos);
+    float attenuation = 1.0 / (light.constant + light.linear * distance + light.quadratic * (distance * distance));  
+
+    ambient  *= attenuation; 
+    diffuse  *= attenuation;
+    specular *= attenuation;
 
     // RESULT 
 
-    vec3 result = ambient + diffuse + specular + emission;
+    vec3 result = ambient + diffuse + specular;
     FragColor = vec4(result, 1.0);
 }
