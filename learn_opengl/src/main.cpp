@@ -263,7 +263,11 @@ int main()
 
         lightingShader.use();
 
-        lightingShader.setVec3("light.position", lightPos);
+        lightingShader.setVec3("light.position", camera.Position);
+        lightingShader.setVec3("light.direction", camera.Front);
+        // We pass a cosine and not an angle because in the frag shader we compute a dot prod which returns a cos
+        // It saves some performance to pass the cos instead of computing the inverse cosine in the shader
+        lightingShader.setFloat("light.cutOff", glm::cos(glm::radians(12.5f)));
         lightingShader.setVec3("viewPos", camera.Position);
 
         // LIGHT properties
