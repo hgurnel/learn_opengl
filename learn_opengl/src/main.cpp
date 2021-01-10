@@ -1,4 +1,4 @@
-// The include file for GLAD includes the required OpenGL headers (like GL/gl.h) 
+// CAUTION: the include file for GLAD includes the required OpenGL headers (like GL/gl.h) 
 // so be sure to include GLAD before other header files that require OpenGL (like GLFW). 
 #include "glad/glad.h"
 #include "GLFW/glfw3.h"
@@ -61,16 +61,16 @@ glm::vec3 lightPos(1.2f, 1.0f, 2.0f);
 
 int main()
 {
-    //  ----- WINDOW 
+    //  ----- WINDOW
 
     glfwInit();
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-    // Use core profile to get access to a smaller subset of OpenGL features without 
+    // Use core profile to have access to a smaller subset of OpenGL features without 
     // backwards-compatible features we no longer need
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-    // Window creation
+    // Window object creation
     GLFWwindow* window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "LearnOpenGL", NULL, NULL);
     
     if (window == NULL)
@@ -79,6 +79,8 @@ int main()
         glfwTerminate();
         return -1;
     }
+
+    // ----- OPENGL CONTEXT
 
     // Make the context of the window the main context of the current thread
     glfwMakeContextCurrent(window);
@@ -93,7 +95,9 @@ int main()
 
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
-    // ----- GLAD: load OpenGL function pointers
+    // ----- GLAD: load the OpenGL function pointers before calling any OpenGl function
+    // GLFW gives us glfwGetProcAddress that defines the correct function based on 
+    // which OS we're compiling for. 
 
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
     {
@@ -251,7 +255,7 @@ int main()
 
     while (!glfwWindowShouldClose(window))
     {
-        // ---- TIMING
+        // ----- TIMING
 
         float currentFrame = glfwGetTime();
         deltaTime = currentFrame - lastFrame;
@@ -385,7 +389,7 @@ int main()
             model = glm::scale(model, glm::vec3(0.2f)); // Make it a smaller cube
             lightCubeShader.setMat4("model", model);
             glDrawArrays(GL_TRIANGLES, 0, 36);
-        }
+        }   
 
         // Swap front (img displayed on screen) and back (img being rendered) buffers to render img without flickering effect
         glfwSwapBuffers(window);
@@ -399,6 +403,11 @@ int main()
     glDeleteVertexArrays(1, &lightCubeVAO);
     glDeleteBuffers(1, &VBO);
 
+    // glfwPollEvents() checks if any events are triggered (like keyboard input or mouse movement events), 
+    // updates the window state, and calls the corresponding functions (which we can register via callback methods)
+    // glfwSwapBuffers(window) swaps the color buffer (a large 2D buffer that contains color values for each pixel 
+    // in GLFW's window) that is used to render to during this render iteration and show it as output to the screen.
+    // Swap between front and back buffers if double buffering is enabled (to avoid image flickering).
     glfwSwapBuffers(window);
     glfwPollEvents();
 
@@ -426,7 +435,7 @@ void processInput(GLFWwindow* window)
         camera.ProcessKeyboard(Camera_Movement::RIGHT, deltaTime);
 }
 
-// Callback fct that is called every time the window is resized
+// Callback fct that resizes the viewport every time the window is resized. 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 {
     glViewport(0, 0, width, height);
