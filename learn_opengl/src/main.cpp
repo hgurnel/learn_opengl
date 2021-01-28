@@ -194,33 +194,37 @@ int main()
 
     // ----- VAO AND VBO for cube container object 
 
-    // 1/ Unique IDs for VBO and VAO
+    // 1/ Generate unique IDs for VBO and VAO
     unsigned int VBO, cubeVAO;
     glGenVertexArrays(1, &cubeVAO);
     glGenBuffers(1, &VBO);
 
-    // 2/ Bind VBO
+    // 2/ Bind VAO first
+    // Any VBO, EBO or calls to glVertexAttribPointer and glEnableVertexAttribArray 
+    // will be stored in the currently-bound VAO
+    // What a VAO stores:
+    // -- Vertex buffer objects (and EBO ?) associated with vertex attributes by calls to glVertexAttribPointer
+    // -- Vertex attribute configurations via glVertexAttribPointer
+    // -- Calls to glEnableVertexAttribArray or glDisableVertexAttribArray
+    glBindVertexArray(cubeVAO);
+
+    // 3/ Bind VBO <-> make it the currently active vertex buffer
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
 
-    // 3/ Create and init a buffer object's data store
+    // 4/ Copy the vertex array, located on the CPU, into the vertex buffer (GPU memory)
     // STATIC_DRAW: the data store contents will be modified once and used many times
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
-    // 4/ Bind VAO
-    // Bind Vertex Array Object 1st. Any VBO, EBO or calls to glVertexAttribPointer and glEnableVertexAttribArray 
-    // will be stored in the currently-bound VAO
-    glBindVertexArray(cubeVAO);
-
-    // 5/ Structure of the vertex attribute(s) (vertex position, normal and texture coords here)
+    // 5/ Define pointers to the vertex attributes
+    // Structure of the vertex attributes here: vertex position, normal and texture coords here
     // from docs.GL: define an array of generic vertex attribute data
     // Tell OpenGL how the vertex attributes are stored in one vertex
-    // glVertexAttribPointer(attributePos, nbChannelsInAttribute, dataType, shouldDataBeNormalised, strideAttribLength, offsetWhereAttribBegins)
+    // glVertexAttribPointer(attributePos, nbChannelsInAttribute, dataType, shouldDataBeNormalised, strideAttrib, offsetWhereAttribBegins)
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
     glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
     glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
     
-    // 6/ Enable attribute(s)
-    // Enable position, normal and texture attributes
+    // 6/ Enable each attribute, so here, position, normal and texture
     glEnableVertexAttribArray(0);
     glEnableVertexAttribArray(1);
     glEnableVertexAttribArray(2);
