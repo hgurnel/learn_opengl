@@ -14,9 +14,11 @@ uniform mat4 projection;
 
 void main()
 {
+	// gl_Position = pre-defined variable which is a vec4 behind the scenes. 
+	// At the end of the main function, whatever we set gl_Position to will 
+	// be used as the output of the vertex shader.
 	// gl_position = the clip-space position of the current vertex 
 	// clip space = normalized device coordinates (NDC), between -1 and 1
-	// It is a predefined output of the vertex shader
 	gl_Position = projection * view * model * vec4(aPos, 1.0);
 
 	// Normal vector expressed in world coordinates using 

@@ -1,4 +1,4 @@
-// The include file for GLAD includes the required OpenGL headers (like GL/gl.h) 
+// CAUTION: the include file for GLAD includes the required OpenGL headers (like GL/gl.h) 
 // so be sure to include GLAD before other header files that require OpenGL (like GLFW). 
 #include "glad/glad.h"
 #include "GLFW/glfw3.h"
@@ -61,16 +61,16 @@ glm::vec3 lightPos(1.2f, 1.0f, 2.0f);
 
 int main()
 {
-    //  ----- WINDOW 
+    //  ----- WINDOW
 
     glfwInit();
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-    // Use core profile to get access to a smaller subset of OpenGL features without 
+    // Use core profile to have access to a smaller subset of OpenGL features without 
     // backwards-compatible features we no longer need
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-    // Window creation
+    // Window object creation
     GLFWwindow* window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "LearnOpenGL", NULL, NULL);
     
     if (window == NULL)
@@ -79,6 +79,8 @@ int main()
         glfwTerminate();
         return -1;
     }
+
+    // ----- OPENGL CONTEXT
 
     // Make the context of the window the main context of the current thread
     glfwMakeContextCurrent(window);
@@ -93,7 +95,9 @@ int main()
 
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
-    // ----- GLAD: load OpenGL function pointers
+    // ----- GLAD: load the OpenGL function pointers before calling any OpenGl function
+    // GLFW gives us glfwGetProcAddress that defines the correct function based on 
+    // which OS we're compiling for. 
 
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
     {
@@ -180,35 +184,47 @@ int main()
         glm::vec3(-1.3f,  1.0f, -1.5f)
     };
 
+    glm::vec3 pointLightPositions[] = 
+    {
+        glm::vec3(0.7f,  0.2f,  2.0f),
+        glm::vec3(2.3f, -3.3f, -4.0f),
+        glm::vec3(-4.0f,  2.0f, -12.0f),
+        glm::vec3(0.0f,  0.0f, -3.0f)
+    };
+
     // ----- VAO AND VBO for cube container object 
 
-    // 1/ Unique IDs for VBO and VAO
+    // 1/ Generate unique IDs for VBO and VAO
     unsigned int VBO, cubeVAO;
     glGenVertexArrays(1, &cubeVAO);
     glGenBuffers(1, &VBO);
 
-    // 2/ Bind VBO
+    // 2/ Bind VAO first
+    // Any VBO, EBO or calls to glVertexAttribPointer and glEnableVertexAttribArray 
+    // will be stored in the currently-bound VAO
+    // What a VAO stores:
+    // -- Vertex buffer objects (and EBO ?) associated with vertex attributes by calls to glVertexAttribPointer
+    // -- Vertex attribute configurations via glVertexAttribPointer
+    // -- Calls to glEnableVertexAttribArray or glDisableVertexAttribArray
+    glBindVertexArray(cubeVAO);
+
+    // 3/ Bind VBO <-> make it the currently active vertex buffer
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
 
-    // 3/ Create and init a buffer object's data store
+    // 4/ Copy the vertex array, located on the CPU, into the vertex buffer (GPU memory)
     // STATIC_DRAW: the data store contents will be modified once and used many times
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
-    // 4/ Bind VAO
-    // Bind Vertex Array Object 1st. Any VBO, EBO or calls to glVertexAttribPointer and glEnableVertexAttribArray 
-    // will be stored in the currently-bound VAO
-    glBindVertexArray(cubeVAO);
-
-    // 5/ Structure of the vertex attribute(s) (vertex position, normal and texture coords here)
+    // 5/ Define pointers to the vertex attributes
+    // Structure of the vertex attributes here: vertex position, normal and texture coords here
     // from docs.GL: define an array of generic vertex attribute data
     // Tell OpenGL how the vertex attributes are stored in one vertex
-    // glVertexAttribPointer(attributePos, nbChannelsInAttribute, dataType, shouldDataBeNormalised, strideAttribLength, offsetWhereAttribBegins)
+    // glVertexAttribPointer(attributePos, nbChannelsInAttribute, dataType, shouldDataBeNormalised, strideAttrib, offsetWhereAttribBegins)
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
     glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
     glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
     
-    // 6/ Enable attribute(s)
-    // Enable position, normal and texture attributes
+    // 6/ Enable each attribute, so here, position, normal and texture
     glEnableVertexAttribArray(0);
     glEnableVertexAttribArray(1);
     glEnableVertexAttribArray(2);
@@ -237,13 +253,13 @@ int main()
     lightingShader.use();
     // 0, 1 and 2 are the texture units assigned to material.diffuse and material.specular
     lightingShader.setInt("material.diffuse", 0);
-    lightingShader.setInt("material.specular", 1);
+    lightingShader.setInt("material.specular", 1);    
 
     // ----- RENDER LOOP
 
     while (!glfwWindowShouldClose(window))
     {
-        // ---- TIMING
+        // ----- TIMING
 
         float currentFrame = glfwGetTime();
         deltaTime = currentFrame - lastFrame;
@@ -282,6 +298,49 @@ int main()
 
         // MATERIAL properties
         lightingShader.setFloat("material.shininess", 64.0f);
+        /*
+        Here we set all the uniforms for the 5/6 types of lights we have. We have to set them manually and index
+        the proper PointLight struct in the array to set each uniform variable. This can be done more code-friendly
+        by defining light types as classes and set their values in there, or by using a more efficient uniform approach
+        by using 'Uniform buffer objects', but that is something we'll discuss in the 'Advanced GLSL' tutorial.
+        */
+        // directional light
+        lightingShader.setVec3("dirLight.direction", -0.2f, -1.0f, -0.3f);
+        lightingShader.setVec3("dirLight.ambient", 0.05f, 0.05f, 0.05f);
+        lightingShader.setVec3("dirLight.diffuse", 0.4f, 0.4f, 0.4f);
+        lightingShader.setVec3("dirLight.specular", 0.5f, 0.5f, 0.5f);
+        // point light 1
+        lightingShader.setVec3("pointLights[0].position", pointLightPositions[0]);
+        lightingShader.setVec3("pointLights[0].ambient", 0.05f, 0.05f, 0.05f);
+        lightingShader.setVec3("pointLights[0].diffuse", 0.8f, 0.8f, 0.8f);
+        lightingShader.setVec3("pointLights[0].specular", 1.0f, 1.0f, 1.0f);
+        lightingShader.setFloat("pointLights[0].constant", 1.0f);
+        lightingShader.setFloat("pointLights[0].linear", 0.09);
+        lightingShader.setFloat("pointLights[0].quadratic", 0.032);
+        // point light 2
+        lightingShader.setVec3("pointLights[1].position", pointLightPositions[1]);
+        lightingShader.setVec3("pointLights[1].ambient", 0.05f, 0.05f, 0.05f);
+        lightingShader.setVec3("pointLights[1].diffuse", 0.8f, 0.8f, 0.8f);
+        lightingShader.setVec3("pointLights[1].specular", 1.0f, 1.0f, 1.0f);
+        lightingShader.setFloat("pointLights[1].constant", 1.0f);
+        lightingShader.setFloat("pointLights[1].linear", 0.09);
+        lightingShader.setFloat("pointLights[1].quadratic", 0.032);
+        // point light 3
+        lightingShader.setVec3("pointLights[2].position", pointLightPositions[2]);
+        lightingShader.setVec3("pointLights[2].ambient", 0.05f, 0.05f, 0.05f);
+        lightingShader.setVec3("pointLights[2].diffuse", 0.8f, 0.8f, 0.8f);
+        lightingShader.setVec3("pointLights[2].specular", 1.0f, 1.0f, 1.0f);
+        lightingShader.setFloat("pointLights[2].constant", 1.0f);
+        lightingShader.setFloat("pointLights[2].linear", 0.09);
+        lightingShader.setFloat("pointLights[2].quadratic", 0.032);
+        // point light 4
+        lightingShader.setVec3("pointLights[3].position", pointLightPositions[3]);
+        lightingShader.setVec3("pointLights[3].ambient", 0.05f, 0.05f, 0.05f);
+        lightingShader.setVec3("pointLights[3].diffuse", 0.8f, 0.8f, 0.8f);
+        lightingShader.setVec3("pointLights[3].specular", 1.0f, 1.0f, 1.0f);
+        lightingShader.setFloat("pointLights[3].constant", 1.0f);
+        lightingShader.setFloat("pointLights[3].linear", 0.09);
+        lightingShader.setFloat("pointLights[3].quadratic", 0.032);
 
         // ----- TRANSFORMS
 
@@ -320,22 +379,21 @@ int main()
         }
 
         // ----- RENDER LIGHT CUBE
-        // weird when we only have a directional light, so we don't render the light object
+        
+        lightCubeShader.use();
+        lightCubeShader.setMat4("projection", projection);
+        lightCubeShader.setMat4("view", view);
 
-        //lightCubeShader.use();
-        //lightCubeShader.setMat4("projection", projection);
-        //lightCubeShader.setMat4("view", view);
-
-        //// Translate the light source cube to the light source's position and scale it down before rendering it
-        //model = glm::mat4(1.0f);
-        //model = glm::translate(model, lightPos);
-
-        //// A smaller cube
-        //model = glm::scale(model, glm::vec3(0.2f)); 
-        //lightCubeShader.setMat4("model", model);
-
-        //glBindVertexArray(lightCubeVAO);
-        //glDrawArrays(GL_TRIANGLES, 0, 36);
+        // we now draw as many light bulbs as we have point lights.
+        glBindVertexArray(lightCubeVAO);
+        for (unsigned int i = 0; i < 4; i++)
+        {
+            model = glm::mat4(1.0f);
+            model = glm::translate(model, pointLightPositions[i]);
+            model = glm::scale(model, glm::vec3(0.2f)); // Make it a smaller cube
+            lightCubeShader.setMat4("model", model);
+            glDrawArrays(GL_TRIANGLES, 0, 36);
+        }   
 
         // Swap front (img displayed on screen) and back (img being rendered) buffers to render img without flickering effect
         glfwSwapBuffers(window);
@@ -349,6 +407,11 @@ int main()
     glDeleteVertexArrays(1, &lightCubeVAO);
     glDeleteBuffers(1, &VBO);
 
+    // glfwPollEvents() checks if any events are triggered (like keyboard input or mouse movement events), 
+    // updates the window state, and calls the corresponding functions (which we can register via callback methods)
+    // glfwSwapBuffers(window) swaps the color buffer (a large 2D buffer that contains color values for each pixel 
+    // in GLFW's window) that is used to render to during this render iteration and show it as output to the screen.
+    // Swap between front and back buffers if double buffering is enabled (to avoid image flickering).
     glfwSwapBuffers(window);
     glfwPollEvents();
 
@@ -376,7 +439,7 @@ void processInput(GLFWwindow* window)
         camera.ProcessKeyboard(Camera_Movement::RIGHT, deltaTime);
 }
 
-// Callback fct that is called every time the window is resized
+// Callback fct that resizes the viewport every time the window is resized. 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 {
     glViewport(0, 0, width, height);
