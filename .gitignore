@@ -94,3 +94,9 @@ learn_opengl/learn_opengl.vcxproj.filters
 learn_opengl/learn_opengl.vcxproj
 
 *.png
+
+*.jpg
+
+*.mtl
+
+model/backpack/source_attribution.txt
