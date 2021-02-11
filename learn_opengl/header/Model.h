@@ -1,23 +1,19 @@
 #ifndef MODEL_H
 #define MODEL_H
 
+// Local headers
+#include "../header/Shader.h"
+#include "../header/Mesh.h"
+// Third-party headers
 #include <glad/glad.h> 
-
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include "../header/stb_image.h"
 #include <../include/assimp/Importer.hpp>
 #include <../include/assimp/scene.h>
 #include <../include/assimp/postprocess.h>
-
-#include "../header/Shader.h"
-#include "../header/Mesh.h"
-
+// Standard library headers
 #include <string>
-#include <fstream>
-#include <sstream>
-#include <iostream>
-#include <map>
 #include <vector>
 
 unsigned int TextureFromFile(const char* path, const std::string& directory, bool gamma = false);
@@ -42,4 +38,4 @@ private:
 	std::vector<Texture> loadMaterialTextures(aiMaterial* mat, aiTextureType type, std::string typeName);
 };
 
-#endif
+#endif	// MODEL_H

@@ -1,16 +1,15 @@
 #ifndef MESH_H
 #define MESH_H
 
+// Local headers
+#include "../header/Shader.h"
 #include "../header/Vertex.h"
 #include "../header/Texture.h"
+// Third-party headers
 #include <glad/glad.h> // holds all OpenGL type declarations
-
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
-
-
-#include "../header/Shader.h"
-
+// Standard library headers
 #include <string>
 #include <vector>
 
@@ -51,5 +50,5 @@ private:
     void setupMesh();
 };
 
-#endif
+#endif  // MESH_H
 
