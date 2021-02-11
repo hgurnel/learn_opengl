@@ -2,7 +2,7 @@
 
 Model::Model(const char* path)
 {
-	// Load the model into a scene object (a data structure of assimp that is equiv to the root object)
+	// Load the model into a scene object (a data structure of assimp that is equivalent to the root object)
 	loadModel(path);
 }
 

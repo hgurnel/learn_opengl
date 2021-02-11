@@ -7,7 +7,9 @@ struct Texture
 {
     unsigned int id;
     std::string type;
-    std::string path; // we store the path of the texture to compare with other textures
+    // store the path of the texture to compare with other textures 
+    // to see if one texture has already been loaded and so to avoid loading it again
+    std::string path;
 };
 
 #endif  // TEXTURE_H

@@ -95,7 +95,8 @@ int main()
 
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
-    // ----- GLAD: load the OpenGL function pointers before calling any OpenGl function
+    // ----- GLAD
+    // load the OpenGL function pointers before calling any OpenGl function
     // GLFW gives us glfwGetProcAddress that defines the correct function based on 
     // which OS we're compiling for. 
 
@@ -118,8 +119,7 @@ int main()
 
     // ----- MODEL LOADING
 
-    Model ourModel(PATH_MODEL);
-    
+    Model ourModel(PATH_MODEL);    
 
     // ----- RENDER LOOP
 
@@ -141,7 +141,11 @@ int main()
         glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+        // ----- SHADER PROGRAM
+
         ourShader.use();
+
+        // ----- TRANSFORMS
 
         // view/projection transformations
         glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
@@ -154,6 +158,9 @@ int main()
         model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f)); // translate it down so it's at the center of the scene
         model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));	// it's a bit too big for our scene, so scale it down
         ourShader.setMat4("model", model);
+        
+        // ----- DRAW
+
         ourModel.draw(ourShader);
 
         // Swap front (img displayed on screen) and back (img being rendered) buffers to render img without flickering effect

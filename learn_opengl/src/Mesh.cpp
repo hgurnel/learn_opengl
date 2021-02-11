@@ -7,7 +7,7 @@ Mesh::Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std:
     m_indices = indices;
     m_textures = textures;
 
-    // now that we have all the required data, set the vertex buffers and its attribute pointers.
+    // now that we have all the required data, set the vertex buffers and its attribute pointers
     setupMesh();
 }
 
@@ -22,13 +22,14 @@ void Mesh::draw(Shader& shader)
         
     for (unsigned int i = 0; i < m_textures.size(); i++)
     {
-        // select active texture unit before binding
+        // select active texture unit before binding. type(GL_TEXTURE0) = GLenum
         glActiveTexture(GL_TEXTURE0 + i);
             
         // retrieve texture number (the N in diffuse_textureN)
         std::string number;
         std::string name = m_textures[i].type;
 
+        // Post-incrementation: get the value of the texture number before incrementing "xxNr"
         if (name == "texture_diffuse")
             number = std::to_string(diffuseNr++);
         else if (name == "texture_specular")
@@ -56,15 +57,16 @@ void Mesh::draw(Shader& shader)
 // initialize all the buffer objects/arrays
 void Mesh::setupMesh()
 {
-    // create buffers/arrays
+    // Create VAO, VBO and EBO
     glGenVertexArrays(  1, &m_VAO);
     glGenBuffers(       1, &m_VBO);
     glGenBuffers(       1, &m_EBO);
 
     glBindVertexArray(m_VAO);
-    // load data into vertex buffers
+
+    // load data into vertex buffer
     glBindBuffer(GL_ARRAY_BUFFER, m_VBO);
-    // A great thing about structs is that their memory layout is sequential for all its items.
+    // A great thing about structs is that their memory layout is sequential for all their items.
     // The effect is that we can simply pass a pointer to the struct and it translates perfectly to a glm::vec3/2 array which
     // again translates to 3/2 floats which translates to a byte array.
     glBufferData(GL_ARRAY_BUFFER, m_vertices.size() * sizeof(Vertex), &m_vertices[0], GL_STATIC_DRAW);
@@ -89,6 +91,7 @@ void Mesh::setupMesh()
     glEnableVertexAttribArray(4);
     glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, bitangent));
 
+    // break the existing VAO binding
     glBindVertexArray(0);
 }
 

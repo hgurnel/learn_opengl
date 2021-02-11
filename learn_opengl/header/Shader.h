@@ -1,9 +1,10 @@
 #ifndef SHADER_H
 #define SHADER_H
 
+// Third-party headers
 #include <glad/glad.h>
 #include <glm/glm.hpp>
-
+// Standard library headers
 #include <string>
 #include <fstream>
 #include <sstream>
@@ -38,4 +39,4 @@ private:
 	void checkCompileErrors(GLuint shader, std::string type);
 };
 
-#endif
+#endif  // SHADER_H
