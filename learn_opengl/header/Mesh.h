@@ -13,22 +13,6 @@
 #include <string>
 #include <vector>
 
-struct Vertex
-{
-    glm::vec3 position;
-    glm::vec3 normal;
-    glm::vec2 texCoords;
-    glm::vec3 tangent;
-    glm::vec3 bitangent;
-};
-
-struct Texture
-{
-    unsigned int id;
-    std::string type;
-    std::string path; // we store the path of the texture to compare with other textures
-};
-
 class Mesh
 {
 public:
